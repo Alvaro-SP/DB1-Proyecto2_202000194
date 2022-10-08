@@ -1,0 +1,84 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="3B6E71B9-A214-46C1-D9D3-4FAE33108FD2" name="HORARIO">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:15:37 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="id_curso_habilitado" id="69B41B56-A1BD-2414-186C-906079FE17DA">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:15:37 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT011</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="dia" id="B008DBCB-B03D-7658-3F15-8120EAF6EC7B">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:15:37 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT011</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="horario" id="B7D47255-8E5A-9980-59B9-B1BB558C03F3">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:15:37 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
+<dataTypeSize>10 CHAR</dataTypeSize>
+<ownDataTypeParameters>10 CHAR,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id" id="8BB3276D-D206-6EAC-AD2D-0A092244FB54">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:18:10 UTC</createdTime>
+<generatorID>858EAAA1-11E5-A31F-072E-A4376D258A34</generatorID>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<referedAttribute>0A462D50-3824-10A9-36C2-A39D05EF9734</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT011</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="6514B18A-2854-9AFE-F23D-09C0908ABA89" name="DOCENTE PK">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:15:37 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>69B41B56-A1BD-2414-186C-906079FE17DA</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

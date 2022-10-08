@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
-<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="36A24DE6-EC9D-1575-BFB8-720AF4818988" name="CARRERA">
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="D8CE3B34-FB36-899F-0A1A-084BB657B5DD" name="HISTORIAL">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:02:02 UTC</createdTime>
+<createdTime>2022-10-08 20:59:06 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -15,21 +15,33 @@
 <minVolumes>0</minVolumes>
 <normalForm>Third</normalForm>
 <attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
-<Attribute name="id" id="28E45E1F-CC8A-E822-5321-831D27AD727D">
+<Attribute name="fecha" id="A33529A8-11CC-8444-D03D-1781DFF5708A">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:04:23 UTC</createdTime>
+<createdTime>2022-10-08 20:59:06 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
 </engineerTo>
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
-<logicalDatatype>LOGDT011</logicalDatatype>
+<logicalDatatype>LOGDT008</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="nombre" id="ACBAC478-DC8C-3130-D424-C67F43069324">
+<Attribute name="descripcion" id="C4D05633-98E6-4253-BA91-CDD2DF31850B">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:03:24 UTC</createdTime>
+<createdTime>2022-10-08 20:59:06 UTC</createdTime>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT040</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="tipo" id="998A4E76-F41E-4572-3D48-DC615A1BE733">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 20:59:06 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -37,21 +49,21 @@
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
 <logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
-<dataTypeSize>80 CHAR</dataTypeSize>
-<ownDataTypeParameters>80 CHAR,,</ownDataTypeParameters>
+<dataTypeSize>10 CHAR</dataTypeSize>
+<ownDataTypeParameters>10 CHAR,,</ownDataTypeParameters>
 </Attribute>
 </attributes>
 <identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
-<identifier id="0E2F7432-1CFE-F7EE-F508-E9BB8A86E9CA" name="CARRERA PK">
+<identifier id="CC30DF96-EE04-4FDD-C275-169AB324013F" name="DOCENTE PK">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:04:48 UTC</createdTime>
+<createdTime>2022-10-08 20:59:06 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
 </engineerTo>
 <pk>true</pk>
 <usedAttributes>
-<attributeRef>28E45E1F-CC8A-E822-5321-831D27AD727D</attributeRef>
+<attributeRef>A33529A8-11CC-8444-D03D-1781DFF5708A</attributeRef>
 </usedAttributes>
 </identifier>
 </identifiers>

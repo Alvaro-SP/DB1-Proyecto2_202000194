@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
-<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="F014155F-7B86-3D5D-F3FA-C52F2F5BD8D3" name="DOCENTE">
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="88126149-CE42-A9F6-839E-F17797082DB8" name="NOTA">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:05:59 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -15,9 +15,9 @@
 <minVolumes>0</minVolumes>
 <normalForm>Third</normalForm>
 <attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
-<Attribute name="registrosiif" id="629D36D3-5DA3-C8C4-3EBD-AE075BC7BB31">
+<Attribute name="codigo_curso" id="C49E30F2-DB29-B027-9282-2E36AE2DD1FF">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:11:41 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -27,9 +27,9 @@
 <logicalDatatype>LOGDT011</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="nombres" id="5F81CC61-A4AF-8CCD-DBBA-4A8414CF7CF4">
+<Attribute name="ciclo" id="FC49C877-0A5E-3DA3-0C6E-56EFC109C3EB">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:06:08 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -37,75 +37,25 @@
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
 <logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
-<dataTypeSize>50 CHAR</dataTypeSize>
-<ownDataTypeParameters>50 CHAR,,</ownDataTypeParameters>
+<dataTypeSize>5 CHAR</dataTypeSize>
+<ownDataTypeParameters>5 CHAR,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="Apellidos" id="691C54E9-2142-E06F-2847-C655B35B97DC">
+<Attribute name="seccion" id="E1515430-9CFF-85EB-1BAE-99E336621372">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:07:21 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
 </engineerTo>
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
-<logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
-<dataTypeSize>80 CHAR</dataTypeSize>
-<ownDataTypeParameters>80 CHAR,,</ownDataTypeParameters>
+<logicalDatatype>LOGDT025</logicalDatatype>
+<dataTypeSize>2 CHAR</dataTypeSize>
+<ownDataTypeParameters>2 CHAR,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="fecha_nacimiento" id="66A382D1-1EE6-95F9-E882-63936B7267F1">
+<Attribute name="carnet" id="5A7AC7BF-46F0-16F5-7990-C6930C22BBFC">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:07:46 UTC</createdTime>
-<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
-<engineerTo>
-<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
-</engineerTo>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>LOGDT008</logicalDatatype>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-</Attribute>
-<Attribute name="correo" id="99AFC3B3-5FDF-0100-4760-259B5934877E">
-<createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:08:34 UTC</createdTime>
-<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
-<engineerTo>
-<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
-</engineerTo>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
-<dataTypeSize>80 CHAR</dataTypeSize>
-<ownDataTypeParameters>80 CHAR,,</ownDataTypeParameters>
-</Attribute>
-<Attribute name="telefono" id="6CE8390D-422A-DB84-2059-67EE10A0C480">
-<createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:08:51 UTC</createdTime>
-<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
-<engineerTo>
-<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
-</engineerTo>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>LOGDT011</logicalDatatype>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-</Attribute>
-<Attribute name="direccion" id="6ACD48A5-B37E-DD53-0380-BA263F495962">
-<createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:11:00 UTC</createdTime>
-<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
-<engineerTo>
-<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
-</engineerTo>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>A3A3C77D-0366-9768-FF89-1C25E56881C8</logicalDatatype>
-<dataTypeSize>80 CHAR</dataTypeSize>
-<ownDataTypeParameters>80 CHAR,,</ownDataTypeParameters>
-</Attribute>
-<Attribute name="dpi" id="A5F5679C-D014-93E6-852D-6BE772609BB6">
-<createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:11:18 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
@@ -115,32 +65,56 @@
 <logicalDatatype>LOGDT027</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="fechainicial" id="8AEEE0D5-8D8B-B609-F3E3-FAE7D17E2DEB">
+<Attribute name="nota" id="88D497E4-F6DA-AB04-BE3F-C99F97E25B65">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:12:14 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
 </engineerTo>
-<nullsAllowed>true</nullsAllowed>
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
-<logicalDatatype>LOGDT008</logicalDatatype>
+<logicalDatatype>LOGDT011</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id" id="AD7297F8-2CD0-B0FD-CC3F-D0FAC79B932D">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:38:17 UTC</createdTime>
+<generatorID>04EBCEC9-5727-530D-9B7E-68A514EA0615</generatorID>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<referedAttribute>0A462D50-3824-10A9-36C2-A39D05EF9734</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT011</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="carnet1" id="582A1FD3-2673-9144-66B7-70B22AC17064">
+<createdBy>alvaro</createdBy>
+<createdTime>2022-10-08 22:38:23 UTC</createdTime>
+<generatorID>F758F22D-9A08-F7FD-D3D1-C9076AD55204</generatorID>
+<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
+<engineerTo>
+<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
+</engineerTo>
+<referedAttribute>2A26FFDA-56A2-5A77-428B-DAE8A3653772</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT027</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
 </attributes>
 <identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
-<identifier id="CCEFAB91-0081-A95B-9C5B-0E3875F54CD9" name="DOCENTE PK">
+<identifier id="532BB3FE-0FB6-7DDA-0091-5C53B53CB4DE" name="DOCENTE PK">
 <createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 20:21:06 UTC</createdTime>
+<createdTime>2022-10-08 21:03:05 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
 <engineerTo>
 <item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
 </engineerTo>
 <pk>true</pk>
-<usedAttributes>
-<attributeRef>629D36D3-5DA3-C8C4-3EBD-AE075BC7BB31</attributeRef>
-</usedAttributes>
 </identifier>
 </identifiers>
 </Entity>
