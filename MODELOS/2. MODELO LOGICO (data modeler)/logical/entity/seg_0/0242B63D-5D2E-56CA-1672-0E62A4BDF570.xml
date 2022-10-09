@@ -52,7 +52,7 @@
 <logicalDatatype>LOGDT011</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
-<Attribute name="creditos_otorga1" id="EFDAEC70-5175-3D1D-2AC4-C3B3A8B956DE">
+<Attribute name="creditos_otorga" id="EFDAEC70-5175-3D1D-2AC4-C3B3A8B956DE">
 <createdBy>alvaro</createdBy>
 <createdTime>2022-10-08 20:57:21 UTC</createdTime>
 <ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
@@ -86,20 +86,6 @@
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
 <logicalDatatype>LOGDT011</logicalDatatype>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-</Attribute>
-<Attribute name="carnet" id="03C9864E-F290-544E-7288-887D548B5F19">
-<createdBy>alvaro</createdBy>
-<createdTime>2022-10-08 21:32:04 UTC</createdTime>
-<generatorID>A2E3CE67-3FC2-EF9F-E7E2-B4897BC8D13F</generatorID>
-<ownerDesignName>2. MODELO LOGICO (data modeler)</ownerDesignName>
-<engineerTo>
-<item key="2EA9FCE3-C53F-4AF2-EF30-2D989D7B7256" value="true"/>
-</engineerTo>
-<referedAttribute>2A26FFDA-56A2-5A77-428B-DAE8A3653772</referedAttribute>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>LOGDT027</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 </Attribute>
 <Attribute name="id" id="02857A17-2F04-C1A2-2D01-30E46FC44C9D">
