@@ -272,35 +272,66 @@ CREATE FUNCTION AsignarCurso
     BEGIN
 
     DECLARE idfound INT;
-    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
-
-    DECLARE temp BOOLEAN;
-    SET temp = is_int(creditos_necesarios);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_necesarios = ROUND(creditos_necesarios,0);
-    SET temp = is_int(creditos_otorga);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_otorga = ROUND(creditos_otorga,0);
-    -- ? VALIDO SI EXISTE LA CARRERA
     DECLARE existe INT;
-    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    DECLARE idtemp INT;
+    DECLARE creditosnecesarios INT;
+    DECLARE creditosestudiante INT;
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
+
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
+    -- ? Validar que el carnet exista
+    
+    SET existe = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
     IF (existe IS NULL) THEN
-        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET ',carne);
     END IF;
-    -- ? VALIDO OBLIGATORIO
-    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
-        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    
+
+    -- ? Se debe validar que no se encuentre ya asignado a la misma u otra sección,
+    SET existe = NULL;
+    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo);
+    IF (existe IS NOT NULL) THEN
+        RETURN CONCAT('ERROR EL ESTUDIANTE YA ESTA ASIGNADO A LA MISMA U OTRA SECCION ',carne);
     END IF;
-    -- ? INSERTO
-    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
-    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
-    RETURN "CURSO CREADO";
+    -- ? que cuente con los créditos necesarios
+    SET creditosnecesarios = (SELECT creditos_necesarios FROM CURSO WHERE codigo=codigo);
+    SET creditosestudiante = (SELECT creditos FROM ESTUDIANTE WHERE carnet = carne);
+    IF (creditosestudiante < creditosnecesarios) THEN
+        RETURN 'ERROR EL ESTUDIANTE NO POSEE CREDITOS SUFICIENTES ';
+    END IF;
+    -- ? que pertenezca a un curso correspondiente a su carrera o área común,
+    SET carreraestudiante = (SELECT carrera FROM ESTUDIANTE WHERE carnet = carne)
+    SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo)
+    IF (carreraestudiante != 0)   THEN
+        IF (carreraestudiante != carreradelcurso) THEN
+            RETURN CONCAT('ERROR EL CURSO NO PERTENECE A LA CARRERA DEL ESTUDIANTE ',carne);
+        END IF;
+    END IF;
+    -- ? también validar que la sección que elige el estudiante sí existe
+    SET existe = NULL;
+    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo AND seccion=seccion);
+    IF (existe IS NOT NULL) THEN
+        RETURN CONCAT('ERROR LA SECCION NO ESTA ENTRE CURSOS HABILITADOS',carne);
+    END IF;
+    -- ? y que no ha alcanzado el cupo máximo, de lo contrario mostrar una explicación del error.
+    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id)
+    IF (cupotemp<1) THEN
+        RETURN 'ERROR EL CUPO DEL CURSO YA LLEGO A SU LIMITE F';
+    END IF;
+    -- ? INSERTO   Se realiza la asignación de un estudiante a determinado curso.
+    INSERT INTO ASIGNADOS (id, id_curso_habilitado, carnet, boolasignado)
+    VALUES (NULL, idfound, carnet, 1);
+    RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
+
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS DesasignarCurso //
 CREATE FUNCTION DesasignarCurso
