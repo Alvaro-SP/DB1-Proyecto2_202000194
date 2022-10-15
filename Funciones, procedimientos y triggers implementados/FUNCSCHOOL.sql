@@ -217,8 +217,6 @@ CREATE FUNCTION HabilitarCurso
     SET cupo = ROUND(cupo,0);
     -- ? *Una letra y guardarla en mayúscula
     SET seccion = UPPER(seccion);
-
-
     -- ? INSERTO
     INSERT INTO HABILITADOS (id, codigo_curso, ciclo, seccion, docente, cupo_maximo, anio, cant_estudiantes, cupos_disponibles, dia, horario)
     VALUES (NULL,codigo_curso,ciclo,seccion,docente,cupo,2022,0,cupo);
@@ -232,31 +230,21 @@ CREATE FUNCTION AgregarHorario
     (id_curso_habilitado INT, dia INT, horario VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
     BEGIN
-    DECLARE temp BOOLEAN;
-    SET temp = is_int(creditos_necesarios);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_necesarios = ROUND(creditos_necesarios,0);
-    SET temp = is_int(creditos_otorga);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_otorga = ROUND(creditos_otorga,0);
-    -- ? VALIDO SI EXISTE LA CARRERA
+    -- ? . Si no se encuentra el id debe retornar error.
     DECLARE existe INT;
-    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    SET existe = (SELECT id FROM HABILITADOS WHERE id=id_curso_habilitado);
     IF (existe IS NULL) THEN
-        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CURSO HABILITADO ',id_curso_habilitado);
     END IF;
-    -- ? VALIDO OBLIGATORIO
-    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
-        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    -- ? *Debe ser dentro del dominio [1,7] correspondiente al día de la semana.
+    IF ((dia < 1) OR (dia > 7)) THEN
+        RETURN 'ERROR DIA DEBE SER DENTRO DE DOMINIO [1,7]';
     END IF;
+
     -- ? INSERTO
-    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
-    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
-    RETURN "CURSO CREADO";
+    INSERT INTO CURSO (id, id_curso_habilitado, dia, horario)
+    VALUES (NULL,id_curso_habilitado,dia,horario);
+    RETURN "HORARIO AGREGADO CORRECTAMENTE AL CURSO";
     END//
 DELIMITER ;
 
