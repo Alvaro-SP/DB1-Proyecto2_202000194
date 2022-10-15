@@ -82,23 +82,15 @@ DELIMITER ;
 
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Crear carrera █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS CrearCarrera //
-CREATE FUNCTION CrearCarrera
-    (
-    nombre VARCHAR(45)
-    ) RETURNS VARCHAR(65)
+CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
     BEGIN
-    DECLARE cdate DATETIME;
     DECLARE temp BOOLEAN;
-    SET cdate = now(); -- * obtengo la fecha actual    
-    SET temp = ValidarCorreo(correo);
+    SET temp = ValidarLetras(nombre);
     IF (temp = 0) THEN
-		RETURN 'ERROR DE CORREO VERIFICAR EL FORMATO DE CORREO';
+		RETURN 'ERROR EL NOMBRE SOLO DEBE TENER LETRAS';
 	END IF;
-
-    INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos)
-    VALUES (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,cdate,0);
-
+    INSERT INTO CARRERA (id, nombre)VALUES (NULL, nombre);
     RETURN "ESTUDIANTE GUARDADO";
     END//
 DELIMITER ;
