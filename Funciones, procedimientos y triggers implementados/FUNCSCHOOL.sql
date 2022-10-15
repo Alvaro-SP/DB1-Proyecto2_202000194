@@ -51,6 +51,22 @@ CREATE FUNCTION is_int(num INT) RETURNS BOOLEAN
     RETURN (valido);
     END //
 DELIMITER ;
+
+DELIMITER //    -- ************************************************************
+DROP FUNCTION IF EXISTS SEARCH_COURSE //
+CREATE FUNCTION  SEARCH_COURSE(codigo INT, ciclo VARCHAR(45), seccion VARCHAR(45)) RETURNS INT
+    deterministic
+    BEGIN
+    DECLARE valido INT;
+    -- * valido con el regex de num
+    IF (num>=0)  THEN
+        SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo AND seccion=seccion INTO valido;
+    ELSE
+        SET valido = -1;
+    END IF;
+    RETURN (valido);
+    END //
+DELIMITER ;
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
 
@@ -254,6 +270,10 @@ CREATE FUNCTION AsignarCurso
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
     deterministic
     BEGIN
+
+    DECLARE idfound INT;
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+
     DECLARE temp BOOLEAN;
     SET temp = is_int(creditos_necesarios);
     IF (temp = 0) THEN
