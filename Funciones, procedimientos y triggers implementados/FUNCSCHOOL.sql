@@ -208,14 +208,14 @@ CREATE FUNCTION HabilitarCurso
     IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL DOCENTE ',docente);
     END IF;
-
+    -- ? Validar que sea un número entero positivo
     DECLARE temp BOOLEAN;
     SET temp = is_int(cupo);
     IF (temp = 0) THEN
 		RETURN 'ERROR CUPO NECESARIO NECESITA SER ENTERO POSITIVO';
 	END IF;
     SET cupo = ROUND(cupo,0);
-
+    -- ? *Una letra y guardarla en mayúscula
     SET seccion = UPPER(seccion);
 
 
@@ -259,6 +259,7 @@ CREATE FUNCTION AgregarHorario
     RETURN "CURSO CREADO";
     END//
 DELIMITER ;
+
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS AsignarCurso //
 CREATE FUNCTION AsignarCurso
