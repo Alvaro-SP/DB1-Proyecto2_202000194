@@ -184,12 +184,211 @@ CREATE FUNCTION CrearCurso
     END//
 DELIMITER ;
 
--- ! █▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
--- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄
--- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
--- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS HabilitarCurso //
+CREATE FUNCTION HabilitarCurso
+    (
+    codigo INT ,
+    nombre VARCHAR(45),
+    creditos_necesarios INT ,
+    creditos_otorga INT ,
+    carrera INT ,
+    obligatorio INT
+    ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    END IF;
+    -- ? INSERTO
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄
+DROP FUNCTION IF EXISTS AgregarHorario //
+CREATE FUNCTION AgregarHorario
+    (
+    codigo INT ,
+    nombre VARCHAR(45),
+    creditos_necesarios INT ,
+    creditos_otorga INT ,
+    carrera INT ,
+    obligatorio INT
+    ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    END IF;
+    -- ? INSERTO
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS AsignarCurso //
+CREATE FUNCTION AsignarCurso
+    (
+    codigo INT ,
+    nombre VARCHAR(45),
+    creditos_necesarios INT ,
+    creditos_otorga INT ,
+    carrera INT ,
+    obligatorio INT
+    ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    END IF;
+    -- ? INSERTO
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS DesasignarCurso //
+CREATE FUNCTION DesasignarCurso
+    (
+    codigo INT ,
+    nombre VARCHAR(45),
+    creditos_necesarios INT ,
+    creditos_otorga INT ,
+    carrera INT ,
+    obligatorio INT
+    ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    END IF;
+    -- ? INSERTO
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS IngresarNota //
+CREATE FUNCTION IngresarNota
+    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT , nota INT) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
+    END IF;
+    -- ? INSERTO
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS GenerarActa //
+CREATE FUNCTION GenerarActa
+    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45) ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    -- ? INSERTO
+    INSERT INTO ACTA (id, id_curso_habilitado, fechayhora )
+    VALUES ();
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
 
 
 
