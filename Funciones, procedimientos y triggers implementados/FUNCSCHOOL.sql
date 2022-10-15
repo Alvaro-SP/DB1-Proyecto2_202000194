@@ -97,10 +97,9 @@ DELIMITER ;
 
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 3. Registrar docente █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
-DROP FUNCTION IF EXISTS RegistrarEstudiante //
-CREATE FUNCTION RegistrarEstudiante
+DROP FUNCTION IF EXISTS RegistrarDocente //
+CREATE FUNCTION RegistrarDocente
     (
-    carnet BIGINT,
     nombres VARCHAR(45),
     apellidos VARCHAR(45),
     fecha_nacimiento DATETIME,
@@ -108,7 +107,7 @@ CREATE FUNCTION RegistrarEstudiante
     telefono INT,
     direccion VARCHAR(45),
     dpi BIGINT,
-    carrera INT 
+    registro_siif INT
     ) RETURNS VARCHAR(65)
     deterministic
     BEGIN
@@ -120,10 +119,10 @@ CREATE FUNCTION RegistrarEstudiante
 		RETURN 'ERROR DE CORREO VERIFICAR EL FORMATO DE CORREO';
 	END IF;
 
-    INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos)
-    VALUES (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,cdate,0);
+    INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion)
+    VALUES (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,cdate);
 
-    RETURN "ESTUDIANTE GUARDADO";
+    RETURN "DOCENTE GUARDADO";
     END//
 DELIMITER ;
 
