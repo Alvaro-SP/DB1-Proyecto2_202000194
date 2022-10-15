@@ -5,7 +5,7 @@
 
 --* █▀▀ █░█ █▄░█ █▀▀ ▀█▀ █ █▀█ █▄░█ █▀   ▄▀█ █▄░█ █▀▄   █▀█ █▀█ █▀█ █▀▀ █▀▀ █▀▄ █░█ █▀█ █▀▀ █▀
 --* █▀░ █▄█ █░▀█ █▄▄ ░█░ █ █▄█ █░▀█ ▄█   █▀█ █░▀█ █▄▀   █▀▀ █▀▄ █▄█ █▄▄ ██▄ █▄▀ █▄█ █▀▄ ██▄ ▄█
-DELIMITER //
+DELIMITER // -- ************************************************************
 DROP FUNCTION IF EXISTS ValidarCorreo //
 CREATE FUNCTION ValidarCorreo(correo VARCHAR(45)) RETURNS BOOLEAN
     deterministic
@@ -20,7 +20,7 @@ CREATE FUNCTION ValidarCorreo(correo VARCHAR(45)) RETURNS BOOLEAN
     RETURN (valido);
     END //
 DELIMITER ;
-DELIMITER //
+DELIMITER //  -- ************************************************************
 DROP FUNCTION IF EXISTS ValidarLetras //
 CREATE FUNCTION ValidarLetras(correo VARCHAR(45)) RETURNS BOOLEAN
     deterministic
@@ -36,6 +36,21 @@ CREATE FUNCTION ValidarLetras(correo VARCHAR(45)) RETURNS BOOLEAN
     END //
 DELIMITER ;
 
+DELIMITER //    -- ************************************************************
+DROP FUNCTION IF EXISTS is_int //
+CREATE FUNCTION is_int(num INT) RETURNS BOOLEAN
+    deterministic
+    BEGIN
+    DECLARE valido BOOLEAN;
+    -- * valido con el regex de num
+    IF (num>=0)  THEN
+        SELECT TRUE INTO valido;
+    ELSE
+        SELECT FALSE INTO valido;
+    END IF;
+    RETURN (valido);
+    END //
+DELIMITER ;
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
 
@@ -81,6 +96,8 @@ CREATE FUNCTION RegistrarEstudiante
 DELIMITER ;
 
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Crear carrera █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 😎
+-- AGREGO AREA COMUN PRIMERO
+INSERT INTO CARRERA (id, nombre) VALUES (NULL, 'Area Comun');
 DROP FUNCTION IF EXISTS CrearCarrera //
 CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
@@ -90,7 +107,7 @@ CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
     IF (temp = 0) THEN
 		RETURN 'ERROR EL NOMBRE SOLO DEBE TENER LETRAS';
 	END IF;
-    INSERT INTO CARRERA (id, nombre)VALUES (NULL, nombre);
+    INSERT INTO CARRERA (id, nombre) VALUES (NULL, nombre);
     RETURN "ESTUDIANTE GUARDADO";
     END//
 DELIMITER ;
@@ -126,9 +143,39 @@ CREATE FUNCTION RegistrarDocente
     END//
 DELIMITER ;
 
-
-
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP FUNCTION IF EXISTS CrearCurso //
+CREATE FUNCTION CrearCurso
+    (
+    codigo INT ,
+    nombre VARCHAR(45),
+    creditos_necesarios INT ,
+    creditos_otorga INT ,
+    carrera INT ,
+    obligatorio INT
+    ) RETURNS VARCHAR(65)
+    deterministic
+    BEGIN
+    DECLARE temp BOOLEAN;
+    SET temp = is_int(creditos_necesarios);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_necesarios = ROUND(creditos_necesarios,0);
+
+    SET temp = is_int(creditos_otorga);
+    IF (temp = 0) THEN
+		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+	END IF;
+    SET creditos_otorga = ROUND(creditos_otorga,0);
+
+    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
+    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+
+    RETURN "CURSO CREADO";
+    END//
+DELIMITER ;
+
 -- ! █▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 -- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
