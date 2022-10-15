@@ -162,16 +162,20 @@ CREATE FUNCTION CrearCurso
 		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
 	END IF;
     SET creditos_necesarios = ROUND(creditos_necesarios,0);
-
     SET temp = is_int(creditos_otorga);
     IF (temp = 0) THEN
 		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
 	END IF;
     SET creditos_otorga = ROUND(creditos_otorga,0);
-
+    -- ? VALIDO SI EXISTE LA CARRERA
+    DECLARE existe INT;
+    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
+    IF (existe IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? INSERTO
     INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
     VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
-
     RETURN "CURSO CREADO";
     END//
 DELIMITER ;
