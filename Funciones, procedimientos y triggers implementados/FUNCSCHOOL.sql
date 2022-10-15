@@ -143,7 +143,7 @@ CREATE FUNCTION RegistrarDocente
     END//
 DELIMITER ;
 
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS CrearCurso //
 CREATE FUNCTION CrearCurso
     (
@@ -172,6 +172,10 @@ CREATE FUNCTION CrearCurso
     SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
     IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    END IF;
+    -- ? VALIDO OBLIGATORIO
+    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
+        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
     END IF;
     -- ? INSERTO
     INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
