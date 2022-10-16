@@ -478,16 +478,25 @@ DELIMITER ;
 
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 delimiter //
-create procedure update_price (IN codigo_carrera varchar(45), IN new_price integer)
+create procedure ConsultarPensum (IN codigo_carrera INT)
     begin
-     Código del curso
-→ Nombre del curso
-→ Es obligatorio (sí o no)
-→ Créditos necesarios
-
-    update book set price=new_price where ISBN=temp_ISBN;
+    --  Código del curso
+    -- → Nombre del curso
+    -- → Es obligatorio (sí o no)
+    -- → Créditos necesarios
+    SELECT * FROM (
+        (
+            SELECT codigo, nombre, obligatorio, creditos_necesarios 
+            FROM CURSO WHERE carrera = 0
+        )
+        UNION ALL
+        (
+            SELECT codigo, nombre, obligatorio, creditos_necesarios 
+            FROM CURSO WHERE carrera = codigo_carrera
+        )
+    ) AS PENSUM_DE_ESTUDIOS;
     end; //
-call update_price(001, 600); //
+call update_price(08); //
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
 → Carnet
 → Nombre completo (concatenado)
