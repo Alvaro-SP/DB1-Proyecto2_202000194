@@ -631,7 +631,7 @@ CREATE FUNCTION RegistrarDocente
     telefono INT,
     direccion VARCHAR(45),
     dpi BIGINT,
-    registro_siif INT
+    registro_siif BIGINT
     ) RETURNS VARCHAR(65)
     deterministic
     BEGIN
@@ -695,10 +695,11 @@ DELIMITER ;
 DELIMITER //
 DROP FUNCTION IF EXISTS HabilitarCurso //
 CREATE FUNCTION HabilitarCurso
-    (codigo_curso INT ,ciclo VARCHAR(45), docente INT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
+    (codigo_curso INT ,ciclo VARCHAR(45), docente BIGINT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE existe INT;
+    DECLARE existeSIIF BIGINT;
     DECLARE temp BOOLEAN;
 
     -- ? *Se debe validar que el curso exista
@@ -712,9 +713,8 @@ CREATE FUNCTION HabilitarCurso
         RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
     END IF;
     -- ? *Se debe validar que el DOCENTE exista
-    SET existe = NULL;
-    SET existe = (SELECT registro_siif FROM DOCENTE WHERE registro_siif=docente);
-    IF (existe IS NULL) THEN
+    SET existeSIIF = (SELECT registro_siif FROM DOCENTE WHERE registro_siif=docente);
+    IF (existeSIIF IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL DOCENTE ',docente);
     END IF;
     -- ? Validar que sea un número entero positivo
@@ -993,7 +993,7 @@ DELIMITER;
 
 DROP procedure IF EXISTS ConsultarEstudiante;
 DELIMITER //
-create procedure ConsultarEstudiante (IN codigo_carrera INT)
+create procedure ConsultarEstudiante (IN carne BIGINT)
     begin
     -- → Carnet
     -- → Nombre completo (concatenado)
@@ -1004,24 +1004,23 @@ create procedure ConsultarEstudiante (IN codigo_carrera INT)
     -- → Número de DPI
     -- → Carrera
     -- → Créditos que posee
-    SELECT * FROM (
-        (
-            SELECT codigo, nombre, obligatorio, creditos_necesarios 
-            FROM CURSO WHERE carrera = 0
-        )
-        UNION ALL
-        (
-            SELECT codigo, nombre, obligatorio, creditos_necesarios 
-            FROM CURSO WHERE carrera = codigo_carrera
-        )
-    ) AS PENSUM_DE_ESTUDIOS;
+    SELECT carnet as CARNE,
+    CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
+    fecha_nacimiento AS FECHA_DE_NACIMIENTO,
+    correo AS CORREO,
+    telefono AS TELEFONO,
+    direccion AS DIRECCION,
+    dpi AS NUMERO_DPI,
+    carrera AS CARRERA,
+    creditos AS CREDITOS_POSEE
+    FROM ESTUDIANTE WHERE carnet=carne;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
 DROP procedure IF EXISTS ConsultarDocente;
 DELIMITER //
-create procedure ConsultarDocente (IN codigo_carrera INT)
+create procedure ConsultarDocente (IN registro_siif BIGINT)
     begin
     -- → Registro SIIF
     -- → Nombre completo
@@ -1030,7 +1029,14 @@ create procedure ConsultarDocente (IN codigo_carrera INT)
     -- → Teléfono
     -- → Dirección
     -- → Número de DPI
-    
+    SELECT registro_siif as REGISTRO_SIIF,
+    CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
+    fecha_nacimiento AS FECHA_DE_NACIMIENTO,
+    correo AS CORREO,
+    telefono AS TELEFONO,
+    direccion AS DIRECCION,
+    dpi AS NUMERO_DPI,
+    FROM ESTUDIANTE WHERE carnet=carne;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
