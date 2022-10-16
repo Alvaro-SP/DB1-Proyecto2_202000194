@@ -70,9 +70,9 @@ DELIMITER ;
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
 
-
-
-
+DELIMITER //
+DROP TRIGGER IF EXISTS
+CREATE TRIGGER
 
 
 -- ? █▀█ █▀▀ █▀▀ █ █▀ ▀█▀ █▀█ █▀█
@@ -128,8 +128,7 @@ CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 3. Registrar docente █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
-DELIMITER // 
-
+DELIMITER //
 DROP FUNCTION IF EXISTS RegistrarDocente //
 CREATE FUNCTION RegistrarDocente
     (
@@ -159,7 +158,7 @@ CREATE FUNCTION RegistrarDocente
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
-DELIMITER // 
+DELIMITER //
 DROP FUNCTION IF EXISTS CrearCurso //
 CREATE FUNCTION CrearCurso
     (
@@ -201,7 +200,7 @@ CREATE FUNCTION CrearCurso
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██😎
-DELIMITER // 
+DELIMITER //
 DROP FUNCTION IF EXISTS HabilitarCurso //
 CREATE FUNCTION HabilitarCurso
     (codigo_curso INT ,ciclo VARCHAR(45), docente INT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
@@ -241,7 +240,7 @@ CREATE FUNCTION HabilitarCurso
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄😎
-DELIMITER // 
+DELIMITER //
 DROP FUNCTION IF EXISTS AgregarHorario //
 CREATE FUNCTION AgregarHorario
     (id_curso_habilitado INT, dia INT, horario VARCHAR(45)) RETURNS VARCHAR(65)
@@ -264,8 +263,8 @@ CREATE FUNCTION AgregarHorario
     RETURN "HORARIO AGREGADO CORRECTAMENTE AL CURSO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎 falta validar varias secciones 
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎 falta validar varias secciones 
+DELIMITER //
 DROP FUNCTION IF EXISTS AsignarCurso //
 CREATE FUNCTION AsignarCurso
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
@@ -336,7 +335,7 @@ CREATE FUNCTION AsignarCurso
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-DELIMITER // 
+DELIMITER //
 DROP FUNCTION IF EXISTS DesasignarCurso //
 CREATE FUNCTION DesasignarCurso
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
@@ -393,7 +392,7 @@ CREATE FUNCTION DesasignarCurso
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-DELIMITER // 
+DELIMITER //
 DROP FUNCTION IF EXISTS IngresarNota //
 CREATE FUNCTION IngresarNota
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT, nota DECIMAL) RETURNS VARCHAR(65)
@@ -444,8 +443,8 @@ CREATE FUNCTION IngresarNota
     RETURN "NOTA AGREGADA CORRECTAMENTE";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // 
 DROP FUNCTION IF EXISTS GenerarActa //
 CREATE FUNCTION GenerarActa
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45) ) RETURNS VARCHAR(65)
@@ -477,6 +476,7 @@ DELIMITER ;
 --? █▀▀ █▀▄ █▄█ █▄▄ ██▄ ▄█ █▀█ █░▀░█ █ ██▄ █░▀█ ░█░ █▄█   █▄▀ ██▄   █▄▀ █▀█ ░█░ █▄█ ▄█
 
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DROP procedure IF EXISTS ConsltarPensum;
 delimiter //
 create procedure ConsultarPensum (IN codigo_carrera INT)
     begin
@@ -496,7 +496,8 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
         )
     ) AS PENSUM_DE_ESTUDIOS;
     end; //
-call update_price(08); //
+
+-- call ConsultarPensum(08);
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
 → Carnet
 → Nombre completo (concatenado)
