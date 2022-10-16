@@ -1182,8 +1182,15 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
             ) AS CICLO,
     2022 AS ANIO,
     -- → Cantidad de estudiantes que llevaron el curso
+    (
+        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
+        JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
+        WHERE HABILITADOS.codigo_curso = codigo AND HABILITADOS.seccion = seccion AND HABILITADOS.ciclo = ciclo
+    ) AS CANT_ESTUDIANT_CURSO
     -- → Cantidad de estudiantes que se desasignaron
+    (SELECT COUNT(id) FROM DESASIGNADOS WHERE DESASIGNADOS.id_curso_habilitado = idfound) AS ESTUDIANTES_DESASIGNADOS,
     -- → Porcentaje de desasignación
+    
     FROM ESTUDIANTE
     JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
     WHERE NOTAS.id_curso_habilitado=idfound;
