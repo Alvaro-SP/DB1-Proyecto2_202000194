@@ -1043,12 +1043,29 @@ DELIMITER;
 
 DROP procedure IF EXISTS ConsultarAsignados;
 DELIMITER //
-create procedure ConsultarAsignados (IN codigo_carrera INT)
+create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio INT,IN seccion VARCHAR(45))
     begin
     -- → Carnet
     -- → Nombre completo
     -- → Créditos que posee
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
+    SET seccion = UPPER(seccion);
+    IF (anio != 2022) THEN
+        RETURN 'ANIO NO REGISTRADO';
+    END IF;
+    -- ? Si no existe mostrar error
     
+    SELECT registro_siif as REGISTRO_SIIF,
+    CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
+    fecha_nacimiento AS FECHA_DE_NACIMIENTO,
+    correo AS CORREO,
+    telefono AS TELEFONO,
+    direccion AS DIRECCION,
+    dpi AS NUMERO_DPI,
+    FROM DOCENTE WHERE registro_siif=registro_siif;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
