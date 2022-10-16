@@ -1159,6 +1159,8 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     -- → Año
     
     DECLARE idfound INT;
+    DECLARE cantestudiantes INT;
+    DECLARE cantllevaroncurso INT;
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
@@ -1172,6 +1174,15 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     IF (anio != 2022) THEN
         RETURN 'ANIO NO REGISTRADO';
     END IF;
+
+    SET cantllevaroncurso =(
+        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
+        JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
+        WHERE HABILITADOS.codigo_curso = codigo AND HABILITADOS.seccion = seccion AND HABILITADOS.ciclo = ciclo
+    ) ;
+    SET cantestudiantes = (SELECT COUNT(id) FROM DESASIGNADOS WHERE DESASIGNADOS.id_curso_habilitado = idfound);
+
+
     -- ? CONSULTA
     SELECT codigo as CODIGO_CURSO,
     seccion as SECCION,
@@ -1182,15 +1193,11 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
             ) AS CICLO,
     2022 AS ANIO,
     -- → Cantidad de estudiantes que llevaron el curso
-    (
-        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
-        JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
-        WHERE HABILITADOS.codigo_curso = codigo AND HABILITADOS.seccion = seccion AND HABILITADOS.ciclo = ciclo
-    ) AS CANT_ESTUDIANT_CURSO
+    cantllevaroncurso AS CANT_ESTUDIANT_CURSO
     -- → Cantidad de estudiantes que se desasignaron
-    (SELECT COUNT(id) FROM DESASIGNADOS WHERE DESASIGNADOS.id_curso_habilitado = idfound) AS ESTUDIANTES_DESASIGNADOS,
+    cantestudiantes AS ESTUDIANTES_DESASIGNADOS,
     -- → Porcentaje de desasignación
-    
+    CONCAT((cantllevaroncurso * (cantestudiantes/100)), "%") AS PORCENTAJE_DESASIGNA
     FROM ESTUDIANTE
     JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
     WHERE NOTAS.id_curso_habilitado=idfound;
