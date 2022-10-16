@@ -73,6 +73,55 @@ DELIMITER ;
 -- ? CURSO
 -- ? HABILITADOS
 -- ? DOCENTE
+DROP TRIGGER IF EXISTS after_insert_students;
+DELIMITER //
+    CREATE TRIGGER after_insert_students
+    AFTER INSERT ON DOCENTE
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'INSERT',
+        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",NEW.carnet,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", """,NEW.carrera,""", """,NEW.fechacreacion,""", ",NEW.creditos,");"),
+        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  NEW.carnet,";")
+        );
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_alumnos;
+DELIMITER //
+    CREATE TRIGGER after_update_students
+    AFTER UPDATE ON DOCENTE
+    FOR EACH ROW
+    BEGIN
+    insert into bitacora( fecha, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'UPDATE',
+        CONCAT("UPDATE ESTUDIANTE SET carnet = ",NEW.carnet,", nombres = """,NEW.nombres,""", apellidos = """,NEW.apellidos,""", fecha_nacimiento = ",NEW.fecha_nacimiento," WHERE correo = ", OLD.correo," WHERE telefono = ", OLD.telefono," WHERE direccion = ", OLD.direccion," WHERE dpi = ", OLD.dpi," WHERE carrera = ", OLD.carrera," WHERE fechacreacion = ", OLD.fechacreacion," WHERE creditos = ", OLD.creditos,";"),
+        CONCAT("UPDATE ESTUDIANTE SET carnet = ",OLD.carnet,", nombres = """,OLD.nombres,""", apellidos = """,OLD.apellidos,""", fecha_nacimiento = ",OLD.fecha_nacimiento," WHERE correo = ", NEW.correo," WHERE telefono = ", NEW.telefono," WHERE direccion = ", NEW.direccion," WHERE dpi = ", NEW.dpi," WHERE carrera = ", NEW.carrera," WHERE fechacreacion = ", NEW.fechacreacion," WHERE creditos = ", NEW.creditos,";")
+    );
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_students;
+DELIMITER //
+    CREATE TRIGGER after_delete_students
+    AFTER DELETE ON DOCENTE
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'DELETE',
+        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  OLD.carnet,";"),
+        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",OLD.carnet,", """,OLD.nombres,""", """,OLD.apellidos,""", """,OLD.fecha_nacimiento,""", """,OLD.correo,""", """,OLD.telefono,""", """,OLD.direccion,""", """,OLD.dpi,""", """,OLD.carrera,""", """,OLD.fechacreacion,""", ",OLD.creditos,");")
+        );
+    END;//
+DELIMITER ;
 -- ? DESASIGNADOS
 -- ? ASIGNADOS
 -- ? ACTA
@@ -82,53 +131,53 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS after_insert_students;
 DELIMITER //
     CREATE TRIGGER after_insert_students
-    AFTER INSERT ON ESTUDIANTES
+    AFTER INSERT ON ESTUDIANTE
     FOR EACH ROW
     BEGIN
         INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
         VALUES(now(),
         'Se ha realizado una acción en la tabla ESTUDIANTES',
         'INSERT',
-        CONCAT("INSERT INTO alumnos (idalumnos, Nombre, Apellido, Calificacion) VALUES (",NEW.idalumnos,", """,NEW.Nombre,""", """,NEW.Apellido,""", ",NEW.Calificacion,");"),
-        CONCAT("DELETE FROM alumnos WHERE idalumnos = ",  NEW.idalumnos,";")
+        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",NEW.carnet,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", """,NEW.carrera,""", """,NEW.fechacreacion,""", ",NEW.creditos,");"),
+        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  NEW.carnet,";")
         );
-    END;//
-DELIMITER ;
--- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_alumnos;
-DELIMITER //
-    CREATE TRIGGER after_delete_alumnos
-    AFTER DELETE ON alumnos
-    FOR EACH ROW
-    BEGIN
-    insert into bitacora( fecha, executedSQL, reverseSQL )
-    values(
-        now(),
-        -- La funcion CONCAT, junta dos valores como una cadena de caracteres.
-        -- construyendo el SQL que elimina el registro recien insertado
-        CONCAT("DELETE FROM alumnos WHERE idalumnos = ",OLD.idalumnos,";"),
-        CONCAT("INSERT INTO alumnos (idalumnos, Nombre, Apellido, Calificacion) VALUES (",OLD.idalumnos,", """,OLD.Nombre,""", """,OLD.Apellido,""", ",OLD.Calificacion,");")
-    );
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
 DROP TRIGGER IF EXISTS after_update_alumnos;
 DELIMITER //
-    CREATE TRIGGER after_update_alumnos
-    AFTER UPDATE ON alumnos
+    CREATE TRIGGER after_update_students
+    AFTER UPDATE ON ESTUDIANTE
     FOR EACH ROW
     BEGIN
     insert into bitacora( fecha, executedSQL, reverseSQL)
     values(
         now(),
-        -- La funcion CONCAT, junta dos valores como una cadena de caracteres.
-        -- construyendo el SQL que elimina el registro recien insertado
-        CONCAT("UPDATE alumnos SET idalumnos = ",NEW.idalumnos,", Nombre = """,NEW.Nombre,""", Apellido = """,NEW.Apellido,""", Calificacion = ",NEW.Calificacion," WHERE idalumnos = ", OLD.idalumnos,";"),
-        CONCAT("UPDATE alumnos SET idalumnos = ",OLD.idalumnos,", Nombre = """,OLD.Nombre,""", Apellido = """,OLD.Apellido,""", Calificacion = ",OLD.Calificacion," WHERE idalumnos = ", NEW.idalumnos,";")
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'UPDATE',
+        CONCAT("UPDATE ESTUDIANTE SET carnet = ",NEW.carnet,", nombres = """,NEW.nombres,""", apellidos = """,NEW.apellidos,""", fecha_nacimiento = ",NEW.fecha_nacimiento," WHERE correo = ", OLD.correo," WHERE telefono = ", OLD.telefono," WHERE direccion = ", OLD.direccion," WHERE dpi = ", OLD.dpi," WHERE carrera = ", OLD.carrera," WHERE fechacreacion = ", OLD.fechacreacion," WHERE creditos = ", OLD.creditos,";"),
+        CONCAT("UPDATE ESTUDIANTE SET carnet = ",OLD.carnet,", nombres = """,OLD.nombres,""", apellidos = """,OLD.apellidos,""", fecha_nacimiento = ",OLD.fecha_nacimiento," WHERE correo = ", NEW.correo," WHERE telefono = ", NEW.telefono," WHERE direccion = ", NEW.direccion," WHERE dpi = ", NEW.dpi," WHERE carrera = ", NEW.carrera," WHERE fechacreacion = ", NEW.fechacreacion," WHERE creditos = ", NEW.creditos,";")
     );
     END;
     //
 DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_students;
+DELIMITER //
+    CREATE TRIGGER after_delete_students
+    AFTER DELETE ON ESTUDIANTE
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'DELETE',
+        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  OLD.carnet,";"),
+        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",OLD.carnet,", """,OLD.nombres,""", """,OLD.apellidos,""", """,OLD.fecha_nacimiento,""", """,OLD.correo,""", """,OLD.telefono,""", """,OLD.direccion,""", """,OLD.dpi,""", """,OLD.carrera,""", """,OLD.fechacreacion,""", ",OLD.creditos,");")
+        );
+    END;//
+DELIMITER ;
+
 
 -- ? █▀█ █▀▀ █▀▀ █ █▀ ▀█▀ █▀█ █▀█
 -- ? █▀▄ ██▄ █▄█ █ ▄█ ░█░ █▀▄ █▄█
@@ -261,9 +310,10 @@ CREATE FUNCTION HabilitarCurso
     (codigo_curso INT ,ciclo VARCHAR(45), docente INT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
     BEGIN
+    DECLARE existe INT;
+    DECLARE temp BOOLEAN;
 
     -- ? *Se debe validar que el curso exista
-    DECLARE existe INT;
     SET existe = (SELECT codigo FROM CURSO WHERE codigo=codigo_curso);
     IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CURSO ',codigo_curso);
@@ -280,7 +330,6 @@ CREATE FUNCTION HabilitarCurso
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL DOCENTE ',docente);
     END IF;
     -- ? Validar que sea un número entero positivo
-    DECLARE temp BOOLEAN;
     SET temp = is_int(cupo);
     IF (temp = 0) THEN
 		RETURN 'ERROR CUPO NECESARIO NECESITA SER ENTERO POSITIVO';
@@ -362,8 +411,8 @@ CREATE FUNCTION AsignarCurso
         RETURN 'ERROR EL ESTUDIANTE NO POSEE CREDITOS SUFICIENTES ';
     END IF;
     -- ? que pertenezca a un curso correspondiente a su carrera o área común,
-    SET carreraestudiante = (SELECT carrera FROM ESTUDIANTE WHERE carnet = carne)
-    SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo)
+    SET carreraestudiante = (SELECT carrera FROM ESTUDIANTE WHERE carnet = carne);
+    SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo);
     IF (carreraestudiante != 0)   THEN
         IF (carreraestudiante != carreradelcurso) THEN
             RETURN CONCAT('ERROR EL CURSO NO PERTENECE A LA CARRERA DEL ESTUDIANTE ',carne);
@@ -376,7 +425,7 @@ CREATE FUNCTION AsignarCurso
         RETURN CONCAT('ERROR LA SECCION NO ESTA ENTRE CURSOS HABILITADOS',carne);
     END IF;
     -- ? y que no ha alcanzado el cupo máximo, de lo contrario mostrar una explicación del error.
-    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id)
+    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id);
     IF (cupotemp<1) THEN
         RETURN 'ERROR EL CUPO DEL CURSO YA LLEGO A SU LIMITE F';
     END IF;
@@ -426,11 +475,10 @@ CREATE FUNCTION DesasignarCurso
 
     -- ? se debe de llevar un control de cada desasignación y asegurarse de que el cupo no se 
     -- ? siga viendo reducido puesto que habría un cupo más para otro estudiante.
-    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id) -- *TOMO EL CUPO DEL ID ACTUAL
+    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id); -- *TOMO EL CUPO DEL ID ACTUAL
     SET cupotemp = cupotemp +1;
     UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
     
-
     SET tempdesasignado = (SELECT cantidad_desasignados FROM DESASIGNADOS WHERE id_curso_habilitado=idfound);
     IF (tempdesasignado IS NULL) THEN
         -- ? INSERTO DESASIGNADO
@@ -527,12 +575,12 @@ DELIMITER ;
 
 
 
---? █▀█ █▀█ █▀█ █▀▀ █▀▀ █▀ ▄▀█ █▀▄▀█ █ █▀▀ █▄░█ ▀█▀ █▀█   █▀▄ █▀▀   █▀▄ ▄▀█ ▀█▀ █▀█ █▀
---? █▀▀ █▀▄ █▄█ █▄▄ ██▄ ▄█ █▀█ █░▀░█ █ ██▄ █░▀█ ░█░ █▄█   █▄▀ ██▄   █▄▀ █▀█ ░█░ █▄█ ▄█
+-- ? █▀█ █▀█ █▀█ █▀▀ █▀▀ █▀ ▄▀█ █▀▄▀█ █ █▀▀ █▄░█ ▀█▀ █▀█   █▀▄ █▀▀   █▀▄ ▄▀█ ▀█▀ █▀█ █▀
+-- ? █▀▀ █▀▄ █▄█ █▄▄ ██▄ ▄█ █▀█ █░▀░█ █ ██▄ █░▀█ ░█░ █▄█   █▄▀ ██▄   █▄▀ █▀█ ░█░ █▄█ ▄█
 
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP procedure IF EXISTS ConsltarPensum;
-delimiter //
+DELIMITER //
 create procedure ConsultarPensum (IN codigo_carrera INT)
     begin
     --  Código del curso
@@ -551,58 +599,113 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
         )
     ) AS PENSUM_DE_ESTUDIOS;
     end; //
-
+DELIMITER;
 -- call ConsultarPensum(08);
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
-→ Carnet
-→ Nombre completo (concatenado)
-→ Fecha de nacimiento
-→ Correo
-→ Teléfono
-→ Dirección
-→ Número de DPI
-→ Carrera
-→ Créditos que posee
+
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Carnet
+    -- → Nombre completo (concatenado)
+    -- → Fecha de nacimiento
+    -- → Correo
+    -- → Teléfono
+    -- → Dirección
+    -- → Número de DPI
+    -- → Carrera
+    -- → Créditos que posee
+    SELECT * FROM (
+        (
+            SELECT codigo, nombre, obligatorio, creditos_necesarios 
+            FROM CURSO WHERE carrera = 0
+        )
+        UNION ALL
+        (
+            SELECT codigo, nombre, obligatorio, creditos_necesarios 
+            FROM CURSO WHERE carrera = codigo_carrera
+        )
+    ) AS PENSUM_DE_ESTUDIOS;
+    end; //
+DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-→ Registro SIIF
-→ Nombre completo
-→ Fecha de nacimiento
-→ Correo
-→ Teléfono
-→ Dirección
-→ Número de DPI
+
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Registro SIIF
+    -- → Nombre completo
+    -- → Fecha de nacimiento
+    -- → Correo
+    -- → Teléfono
+    -- → Dirección
+    -- → Número de DPI
+    
+    end; //
+DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
-→ Carnet
-→ Nombre completo
-→ Créditos que posee
 
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Carnet
+    -- → Nombre completo
+    -- → Créditos que posee
+    
+    end; //
+DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-→ Código de curso (se repite en cada fila)
-→ Carnet
-→ Nombre completo
-→ “APROBADO” / “DESAPROBADO”
+
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Código de curso (se repite en cada fila)
+    -- → Carnet
+    -- → Nombre completo
+    -- → “APROBADO” / “DESAPROBADO”
+    
+    end; //
+DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-→ Código de curso (se repite en cada fila)
-→ Sección
-→ Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
-“SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
-DICIEMBRE”
-→ Año
-→ Cantidad de estudiantes que llevaron el curso (o cantidad de notas 
-que fueron ingresadas)
-→ Fecha y hora de generado
 
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Código de curso (se repite en cada fila)
+    -- → Sección
+    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
+    -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
+    -- DICIEMBRE”
+    -- → Año
+    -- → Cantidad de estudiantes que llevaron el curso (o cantidad de notas 
+    -- que fueron ingresadas)
+    -- → Fecha y hora de generado
+    
+    end; //
+DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
-→ Código de curso
-→ Sección
-→ Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
-“SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
-DICIEMBRE”
-→ Año
-→ Cantidad de estudiantes que llevaron el curso
-→ Cantidad de estudiantes que se desasignaron
-→ Porcentaje de desasignación
 
+DROP procedure IF EXISTS ConsltarPensum;
+DELIMITER //
+create procedure ConsultarPensum (IN codigo_carrera INT)
+    begin
+    -- → Código de curso
+    -- → Sección
+    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
+    -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
+    -- DICIEMBRE”
+    -- → Año
+    -- → Cantidad de estudiantes que llevaron el curso
+    -- → Cantidad de estudiantes que se desasignaron
+    -- → Porcentaje de desasignación
+    
+    end; //
+DELIMITER;
 
 
 
