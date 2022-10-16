@@ -330,7 +330,7 @@ CREATE FUNCTION AsignarCurso
     VALUES (NULL, idfound, carnet, 1);
     -- ! FINALMENTE SOLO QUEDA RESTAR UNO A LOS CUPOS DISPONIBLES EN EL CURSO
     SET cupotemp = cupotemp -1;
-    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
+    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
     RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
