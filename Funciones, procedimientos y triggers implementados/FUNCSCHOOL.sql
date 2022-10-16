@@ -67,11 +67,158 @@ CREATE FUNCTION  SEARCH_COURSE(codigo INT, ciclo VARCHAR(45), seccion VARCHAR(45
     RETURN (valido);
     END //
 DELIMITER ;
+
+
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
+
 -- ? CARRERA
+DROP TRIGGER IF EXISTS after_insert_CARRERA;
+DELIMITER //
+    CREATE TRIGGER after_insert_CARRERA
+    AFTER INSERT ON CARRERA
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla CARRERA',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_CARRERA;
+DELIMITER //
+    CREATE TRIGGER after_update_CARRERA
+    AFTER UPDATE ON CARRERA
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla CARRERA',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_CARRERA;
+DELIMITER //
+    CREATE TRIGGER after_delete_CARRERA
+    AFTER DELETE ON CARRERA
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla CARRERA',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? CURSO
+DROP TRIGGER IF EXISTS after_insert_curso;
+DELIMITER //
+    CREATE TRIGGER after_insert_curso
+    AFTER INSERT ON CURSO
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla CURSO',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_curso;
+DELIMITER //
+    CREATE TRIGGER after_update_curso
+    AFTER UPDATE ON CURSO
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla CURSO',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_curso;
+DELIMITER //
+    CREATE TRIGGER after_delete_curso
+    AFTER DELETE ON CURSO
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla CURSO',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? HABILITADOS
+DROP TRIGGER IF EXISTS after_insert_habilitados;
+DELIMITER //
+    CREATE TRIGGER after_insert_habilitados
+    AFTER INSERT ON HABILITADOS
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla HABILITADOS',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_habilitados;
+DELIMITER //
+    CREATE TRIGGER after_update_habilitados
+    AFTER UPDATE ON HABILITADOS
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla HABILITADOS',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_habilitados;
+DELIMITER //
+    CREATE TRIGGER after_delete_habilitados
+    AFTER DELETE ON HABILITADOS
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla HABILITADOS',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? DOCENTE
 DROP TRIGGER IF EXISTS after_insert_docente;
 DELIMITER //
@@ -83,8 +230,7 @@ DELIMITER //
         VALUES(now(),
         'Se ha realizado una acción en la tabla DOCENTE',
         'INSERT',
-        CONCAT("INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion) 
-        VALUES (",NEW.registro_siif,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", ",NEW.fechacreacion,");"),
+        CONCAT("INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion) VALUES (",NEW.registro_siif,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", ",NEW.fechacreacion,");"),
         CONCAT("DELETE FROM DOCENTE WHERE carnet = ",  NEW.carnet,";")
         );
     END;//
@@ -96,13 +242,13 @@ DELIMITER //
     AFTER UPDATE ON DOCENTE
     FOR EACH ROW
     BEGIN
-    insert into bitacora( fecha, executedSQL, reverseSQL)
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
     values(
         now(),
-        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'Se ha realizado una acción en la tabla DOCENTE',
         'UPDATE',
-        CONCAT("UPDATE ESTUDIANTE SET carnet = ",NEW.carnet,", nombres = """,NEW.nombres,""", apellidos = """,NEW.apellidos,""", fecha_nacimiento = ",NEW.fecha_nacimiento," WHERE correo = ", OLD.correo," WHERE telefono = ", OLD.telefono," WHERE direccion = ", OLD.direccion," WHERE dpi = ", OLD.dpi," WHERE carrera = ", OLD.carrera," WHERE fechacreacion = ", OLD.fechacreacion," WHERE creditos = ", OLD.creditos,";"),
-        CONCAT("UPDATE ESTUDIANTE SET carnet = ",OLD.carnet,", nombres = """,OLD.nombres,""", apellidos = """,OLD.apellidos,""", fecha_nacimiento = ",OLD.fecha_nacimiento," WHERE correo = ", NEW.correo," WHERE telefono = ", NEW.telefono," WHERE direccion = ", NEW.direccion," WHERE dpi = ", NEW.dpi," WHERE carrera = ", NEW.carrera," WHERE fechacreacion = ", NEW.fechacreacion," WHERE creditos = ", NEW.creditos,";")
+        CONCAT("UPDATE ESTUDIANTE SET registro_siif = ",NEW.registro_siif,", nombres = """,NEW.nombres,""", apellidos = """,NEW.apellidos,""", fecha_nacimiento = ",NEW.fecha_nacimiento," WHERE correo = ", OLD.correo," WHERE telefono = ", OLD.telefono," WHERE direccion = ", OLD.direccion," WHERE dpi = ", OLD.dpi," WHERE fechacreacion = ", OLD.fechacreacion,";"),
+        CONCAT("UPDATE ESTUDIANTE SET registro_siif = ",OLD.registro_siif,", nombres = """,OLD.nombres,""", apellidos = """,OLD.apellidos,""", fecha_nacimiento = ",OLD.fecha_nacimiento," WHERE correo = ", NEW.correo," WHERE telefono = ", NEW.telefono," WHERE direccion = ", NEW.direccion," WHERE dpi = ", NEW.dpi," WHERE fechacreacion = ", NEW.fechacreacion,";")
     );
     END;
     //
@@ -116,18 +262,259 @@ DELIMITER //
     BEGIN
     INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
     VALUES(now(),
-        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'Se ha realizado una acción en la tabla DOCENTE',
         'DELETE',
-        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  OLD.carnet,";"),
-        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",OLD.carnet,", """,OLD.nombres,""", """,OLD.apellidos,""", """,OLD.fecha_nacimiento,""", """,OLD.correo,""", """,OLD.telefono,""", """,OLD.direccion,""", """,OLD.dpi,""", """,OLD.carrera,""", """,OLD.fechacreacion,""", ",OLD.creditos,");")
+        CONCAT("DELETE FROM DOCENTE WHERE registro_siif = ",  OLD.registro_siif,";"),
+        CONCAT("INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion) VALUES (",OLD.registro_siif,", """,OLD.nombres,""", """,OLD.apellidos,""", """,OLD.fecha_nacimiento,""", """,OLD.correo,""", """,OLD.telefono,""", """,OLD.direccion,""", """,OLD.dpi,""", ",OLD.fechacreacion,");")
         );
     END;//
 DELIMITER ;
+
 -- ? DESASIGNADOS
+DROP TRIGGER IF EXISTS after_insert_DESASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_insert_DESASIGNADOS
+    AFTER INSERT ON DESASIGNADOS
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla DESASIGNADOS',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_DESASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_update_DESASIGNADOS
+    AFTER UPDATE ON DESASIGNADOS
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla DESASIGNADOS',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_DESASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_delete_DESASIGNADOS
+    AFTER DELETE ON DESASIGNADOS
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla DESASIGNADOS',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? ASIGNADOS
+DROP TRIGGER IF EXISTS after_insert_ASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_insert_ASIGNADOS
+    AFTER INSERT ON ASIGNADOS
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla ASIGNADOS',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_ASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_update_ASIGNADOS
+    AFTER UPDATE ON ASIGNADOS
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla ASIGNADOS',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_ASIGNADOS;
+DELIMITER //
+    CREATE TRIGGER after_delete_ASIGNADOS
+    AFTER DELETE ON ASIGNADOS
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla ASIGNADOS',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? ACTA
+DROP TRIGGER IF EXISTS after_insert_ACTA;
+DELIMITER //
+    CREATE TRIGGER after_insert_ACTA
+    AFTER INSERT ON ACTA
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla ACTA',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_ACTA;
+DELIMITER //
+    CREATE TRIGGER after_update_ACTA
+    AFTER UPDATE ON ACTA
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla ACTA',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_ACTA;
+DELIMITER //
+    CREATE TRIGGER after_delete_ACTA
+    AFTER DELETE ON ACTA
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla ACTA',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? NOTAS
+DROP TRIGGER IF EXISTS after_insert_NOTAS;
+DELIMITER //
+    CREATE TRIGGER after_insert_NOTAS
+    AFTER INSERT ON CARRERA
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla NOTAS',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_NOTAS;
+DELIMITER //
+    CREATE TRIGGER after_update_NOTAS
+    AFTER UPDATE ON NOTAS
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla NOTAS',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_NOTAS;
+DELIMITER //
+    CREATE TRIGGER after_delete_NOTAS
+    AFTER DELETE ON NOTAS
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla NOTAS',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? HORARIO
+DROP TRIGGER IF EXISTS after_insert_HORARIO;
+DELIMITER //
+    CREATE TRIGGER after_insert_HORARIO
+    AFTER INSERT ON CARRERA
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla HORARIO',
+        'INSERT',
+        "",
+        "");
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_HORARIO;
+DELIMITER //
+    CREATE TRIGGER after_update_HORARIO
+    AFTER UPDATE ON CARRERA
+    FOR EACH ROW
+    BEGIN
+    insert HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    values(
+        now(),
+        'Se ha realizado una acción en la tabla HORARIO',
+        'UPDATE',
+        "",
+        "");
+    END;
+    //
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_HORARIO;
+DELIMITER //
+    CREATE TRIGGER after_delete_HORARIO
+    AFTER DELETE ON HORARIO
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+    VALUES(now(),
+        'Se ha realizado una acción en la tabla HORARIO',
+        'DELETE',
+        "",
+        ""
+        );
+    END;//
+DELIMITER ;
+
 -- ? ESTUDIANTE
 DROP TRIGGER IF EXISTS after_insert_students;
 DELIMITER //
@@ -151,7 +538,7 @@ DELIMITER //
     AFTER UPDATE ON ESTUDIANTE
     FOR EACH ROW
     BEGIN
-    insert into bitacora( fecha, executedSQL, reverseSQL)
+    insert into HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
     values(
         now(),
         'Se ha realizado una acción en la tabla ESTUDIANTES',
