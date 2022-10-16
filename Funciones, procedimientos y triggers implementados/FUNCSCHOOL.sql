@@ -79,8 +79,8 @@ DELIMITER ;
 -- ? █▀▄ ██▄ █▄█ █ ▄█ ░█░ █▀▄ █▄█
 
 
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. REGISTRO DE ESTUDIANTES █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 😎
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 1. REGISTRO DE ESTUDIANTES █▄██▄██▄██▄██▄██▄██▄██▄██▄███ 😎
+DELIMITER // 
 DROP FUNCTION IF EXISTS RegistrarEstudiante //
 CREATE FUNCTION RegistrarEstudiante
     (  
@@ -110,8 +110,8 @@ CREATE FUNCTION RegistrarEstudiante
     RETURN "ESTUDIANTE GUARDADO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Crear carrera █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 😎
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Crear carrera █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 😎
+DELIMITER // 
 -- AGREGO AREA COMUN PRIMERO
 INSERT INTO CARRERA (id, nombre) VALUES (NULL, 'Area Comun');
 DROP FUNCTION IF EXISTS CrearCarrera //
@@ -127,8 +127,8 @@ CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
     RETURN "ESTUDIANTE GUARDADO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 3. Registrar docente █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 3. Registrar docente █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
+DELIMITER // 
 
 DROP FUNCTION IF EXISTS RegistrarDocente //
 CREATE FUNCTION RegistrarDocente
@@ -158,8 +158,8 @@ CREATE FUNCTION RegistrarDocente
     RETURN "DOCENTE GUARDADO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 4. Crear curso   █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
+DELIMITER // 
 DROP FUNCTION IF EXISTS CrearCurso //
 CREATE FUNCTION CrearCurso
     (
@@ -199,8 +199,8 @@ CREATE FUNCTION CrearCurso
     RETURN "CURSO CREADO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██ 5. Habilitar curso para asignación ██▄██▄██▄██▄██▄██▄██▄██▄██😎
+DELIMITER // 
 DROP FUNCTION IF EXISTS HabilitarCurso //
 CREATE FUNCTION HabilitarCurso
     (codigo_curso INT ,ciclo VARCHAR(45), docente INT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
@@ -239,8 +239,8 @@ CREATE FUNCTION HabilitarCurso
     RETURN "CURSO HABILITADO CORRECTAMENTE";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄
+-- ! █▄██▄██▄██▄██▄██▄ 6. Agregar un horario de curso habilitado ██▄██▄██▄███▄██▄██▄██▄😎
+DELIMITER // 
 DROP FUNCTION IF EXISTS AgregarHorario //
 CREATE FUNCTION AgregarHorario
     (id_curso_habilitado INT, dia INT, horario VARCHAR(45)) RETURNS VARCHAR(65)
@@ -264,7 +264,7 @@ CREATE FUNCTION AgregarHorario
     END//
 DELIMITER ;
 
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 7. Asignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎 falta validar varias secciones 
 DROP FUNCTION IF EXISTS AsignarCurso //
 CREATE FUNCTION AsignarCurso
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
@@ -334,8 +334,8 @@ CREATE FUNCTION AsignarCurso
     RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
-
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // 
 DROP FUNCTION IF EXISTS DesasignarCurso //
 CREATE FUNCTION DesasignarCurso
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
@@ -343,24 +343,31 @@ CREATE FUNCTION DesasignarCurso
     BEGIN
     DECLARE idfound INT;
     DECLARE existecarne BIGINT;
+
+
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
     IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
         RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
     END IF;
+
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
 		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
+
     -- ? Validar que el carnet exista
     SET existecarne = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
     IF (existecarne IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET',carne);
     END IF;
 
-    validar que el estudiante ya se encontraba asignado a esa sección, 
-    se debe de llevar un control de cada desasignación y asegurarse de que el cupo no se 
-    siga viendo reducido puesto que habría un cupo más para otro estudiante.
+    -- ? validar que el estudiante ya se encontraba asignado a esa sección,
+
+
+
+    -- ? se debe de llevar un control de cada desasignación y asegurarse de que el cupo no se 
+    -- ? siga viendo reducido puesto que habría un cupo más para otro estudiante.
 
 
 
@@ -376,23 +383,28 @@ CREATE FUNCTION DesasignarCurso
 		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
 	END IF;
     SET creditos_otorga = ROUND(creditos_otorga,0);
+
     -- ? VALIDO SI EXISTE LA CARRERA
     DECLARE existe INT;
     SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
     IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
     END IF;
+
     -- ? VALIDO OBLIGATORIO
     IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
         RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
     END IF;
+
     -- ? INSERTO
     INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
     VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
+
     RETURN "CURSO CREADO";
     END//
 DELIMITER ;
-DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+DELIMITER // 
 DROP FUNCTION IF EXISTS IngresarNota //
 CREATE FUNCTION IngresarNota
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45)) RETURNS VARCHAR(65)
