@@ -173,6 +173,8 @@ CREATE FUNCTION CrearCurso
     deterministic
     BEGIN
     DECLARE temp BOOLEAN;
+    DECLARE existe INT;
+
     SET temp = is_int(creditos_necesarios);
     IF (temp = 0) THEN
 		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
@@ -184,7 +186,6 @@ CREATE FUNCTION CrearCurso
 	END IF;
     SET creditos_otorga = ROUND(creditos_otorga,0);
     -- ? VALIDO SI EXISTE LA CARRERA
-    DECLARE existe INT;
     SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
     IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
@@ -375,7 +376,7 @@ CREATE FUNCTION DesasignarCurso
     SET cupotemp = cupotemp +1;
     UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
     
-    
+
     SET tempdesasignado = (SELECT cantidad_desasignados FROM DESASIGNADOS WHERE id_curso_habilitado=idfound);
     IF (tempdesasignado IS NULL) THEN
         -- ? INSERTO DESASIGNADO
@@ -395,36 +396,55 @@ DELIMITER ;
 DELIMITER // 
 DROP FUNCTION IF EXISTS IngresarNota //
 CREATE FUNCTION IngresarNota
-    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45)) RETURNS VARCHAR(65)
+    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT, nota DECIMAL) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE temp BOOLEAN;
-    SET temp = is_int(creditos_necesarios);
+    DECLARE existecarne BIGINT;
+    DECLARE notatemp INT;
+    DECLARE idfound INT;
+
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
+    -- ? Validar que el carnet exista
+    SET existecarne = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
+    IF (existecarne IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET',carne);
+    END IF;
+    -- ? Validar que sea positivo
+    SET temp = is_int(nota);
     IF (temp = 0) THEN
 		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
 	END IF;
     SET creditos_necesarios = ROUND(creditos_necesarios,0);
-    SET temp = is_int(creditos_otorga);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
+
+    -- ? Se utiliza cuando el docense debe aplicar un redondeo al entero más próximo. 
+    SET notatemp = ROUND(nota,0);
+
+    -- ? Si el estudiante aprobó el curso (Nota >= 61) entonces se suma la cantidad de créditos 
+    -- ? que posee el estudiante con la cantidad de créditos que otorga el curso aprobado.
+    IF (notatemp >= 61) THEN
+        SET creditoscurso = (SELECT creditos_otorga FROM CURSO WHERE codigo = codigo);
+        SET creditosestud = (SELECT creditos FROM ESTUDIANTE WHERE carnet=carne);
+        SET creditosestud = creditosestud + creditoscurso;
+        UPDATE ESTUDIANTE SET creditos=creditosestud WHERE carnet=carne; -- ! actualizo CREDITOS si aprobo
+    END IF;
+
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
-    SET creditos_otorga = ROUND(creditos_otorga,0);
-    -- ? VALIDO SI EXISTE LA CARRERA
-    DECLARE existe INT;
-    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
-    IF (existe IS NULL) THEN
-        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
-    END IF;
-    -- ? VALIDO OBLIGATORIO
-    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
-        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
-    END IF;
+
     -- ? INSERTO
-    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
-    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
-    RETURN "CURSO CREADO";
+    INSERT INTO NOTAS (id, id_curso_habilitado, carnet, nota)
+    VALUES (NULL, idfound, carne, notatemp);
+    RETURN "NOTA AGREGADA CORRECTAMENTE";
     END//
 DELIMITER ;
+
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS GenerarActa //
 CREATE FUNCTION GenerarActa
