@@ -69,11 +69,66 @@ CREATE FUNCTION  SEARCH_COURSE(codigo INT, ciclo VARCHAR(45), seccion VARCHAR(45
 DELIMITER ;
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
-
+-- ? CARRERA
+-- ? CURSO
+-- ? HABILITADOS
+-- ? DOCENTE
+-- ? DESASIGNADOS
+-- ? ASIGNADOS
+-- ? ACTA
+-- ? NOTAS
+-- ? HORARIO
+-- ? ESTUDIANTE
+DROP TRIGGER IF EXISTS after_insert_students;
 DELIMITER //
-DROP TRIGGER IF EXISTS
-CREATE TRIGGER
-
+    CREATE TRIGGER after_insert_students
+    AFTER INSERT ON ESTUDIANTES
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
+        VALUES(now(),
+        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'INSERT',
+        CONCAT("INSERT INTO alumnos (idalumnos, Nombre, Apellido, Calificacion) VALUES (",NEW.idalumnos,", """,NEW.Nombre,""", """,NEW.Apellido,""", ",NEW.Calificacion,");"),
+        CONCAT("DELETE FROM alumnos WHERE idalumnos = ",  NEW.idalumnos,";")
+        );
+    END;//
+DELIMITER ;
+-- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_delete_alumnos;
+DELIMITER //
+    CREATE TRIGGER after_delete_alumnos
+    AFTER DELETE ON alumnos
+    FOR EACH ROW
+    BEGIN
+    insert into bitacora( fecha, executedSQL, reverseSQL )
+    values(
+        now(),
+        -- La funcion CONCAT, junta dos valores como una cadena de caracteres.
+        -- construyendo el SQL que elimina el registro recien insertado
+        CONCAT("DELETE FROM alumnos WHERE idalumnos = ",OLD.idalumnos,";"),
+        CONCAT("INSERT INTO alumnos (idalumnos, Nombre, Apellido, Calificacion) VALUES (",OLD.idalumnos,", """,OLD.Nombre,""", """,OLD.Apellido,""", ",OLD.Calificacion,");")
+    );
+    END;//
+DELIMITER ;
+-- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
+DROP TRIGGER IF EXISTS after_update_alumnos;
+DELIMITER $$
+    CREATE TRIGGER after_update_alumnos
+    AFTER UPDATE ON alumnos
+    FOR EACH ROW
+    BEGIN
+    insert into bitacora( fecha, executedSQL, reverseSQL)
+    values(   
+        now(),
+        -- La funcion CONCAT, junta dos valores como una cadena de caracteres.
+        -- construyendo el SQL que elimina el registro recien insertado
+        CONCAT("UPDATE alumnos SET idalumnos = ",NEW.idalumnos,", Nombre = """,NEW.Nombre,""", Apellido = """,NEW.Apellido,""", Calificacion = ",NEW.Calificacion," WHERE idalumnos = ", OLD.idalumnos,";"),
+        CONCAT("UPDATE alumnos SET idalumnos = ",OLD.idalumnos,", Nombre = """,OLD.Nombre,""", Apellido = """,OLD.Apellido,""", Calificacion = ",OLD.Calificacion," WHERE idalumnos = ", NEW.idalumnos,";")
+    );
+    END;
+    $$
+DELIMITER ;
 
 -- ? █▀█ █▀▀ █▀▀ █ █▀ ▀█▀ █▀█ █▀█
 -- ? █▀▄ ██▄ █▄█ █ ▄█ ░█░ █▀▄ █▄█
