@@ -1149,7 +1149,7 @@ DELIMITER;
 
 DROP procedure IF EXISTS ConsultarDesasignacion;
 DELIMITER //
-create procedure ConsultarDesasignacion (IN codigo_carrera INT)
+create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN anio INT,IN seccion VARCHAR(45))
     begin
     -- → Código de curso
     -- → Sección
@@ -1157,10 +1157,36 @@ create procedure ConsultarDesasignacion (IN codigo_carrera INT)
     -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
     -- DICIEMBRE”
     -- → Año
+    
+    DECLARE idfound INT;
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
+    SET seccion = UPPER(seccion);
+    IF (anio != 2022) THEN
+        RETURN 'ANIO NO REGISTRADO';
+    END IF;
+    -- ? CONSULTA
+    SELECT codigo as CODIGO_CURSO,
+    seccion as SECCION,
+    SELECT IF(STRCMP(ciclo,"1S") = 0, "PRIMER SEMESTRE",
+            IF(STRCMP(ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
+                IF(STRCMP(ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
+                    IF(STRCMP(ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
+            ) AS CICLO,
+    2022 AS ANIO,
     -- → Cantidad de estudiantes que llevaron el curso
     -- → Cantidad de estudiantes que se desasignaron
     -- → Porcentaje de desasignación
-    
+    FROM ESTUDIANTE
+    JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
+    WHERE NOTAS.id_curso_habilitado=idfound;
     end; //
 DELIMITER;
 
