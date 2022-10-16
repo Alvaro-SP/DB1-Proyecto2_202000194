@@ -451,9 +451,23 @@ CREATE FUNCTION GenerarActa
     (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45) ) RETURNS VARCHAR(65)
     deterministic
     BEGIN
+    DECLARE cdate DATETIME;
+    DECLARE temp BOOLEAN;
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
+    -- ? Al momento de que el docente termina de ingresar notas se genera un acta, 
+    -- ? por lo que es necesario hacer la validación de que ya ingresó las notas de 
+    -- ? todos los estudiantes asignados, de lo contrario mostrar un error. 
+
+    -- ?  Se debe de almacenar la fecha y hora exacta en que se generó el acta.
+    SET cdate = now(); -- * obtengo la fecha actual
+
     -- ? INSERTO
     INSERT INTO ACTA (id, id_curso_habilitado, fechayhora )
-    VALUES ();
+    VALUES (NULL, idfound, cdate);
     RETURN "CURSO CREADO";
     END//
 DELIMITER ;
