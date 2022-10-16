@@ -113,13 +113,13 @@ DELIMITER //
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
 DROP TRIGGER IF EXISTS after_update_alumnos;
-DELIMITER $$
+DELIMITER //
     CREATE TRIGGER after_update_alumnos
     AFTER UPDATE ON alumnos
     FOR EACH ROW
     BEGIN
     insert into bitacora( fecha, executedSQL, reverseSQL)
-    values(   
+    values(
         now(),
         -- La funcion CONCAT, junta dos valores como una cadena de caracteres.
         -- construyendo el SQL que elimina el registro recien insertado
@@ -127,7 +127,7 @@ DELIMITER $$
         CONCAT("UPDATE alumnos SET idalumnos = ",OLD.idalumnos,", Nombre = """,OLD.Nombre,""", Apellido = """,OLD.Apellido,""", Calificacion = ",OLD.Calificacion," WHERE idalumnos = ", NEW.idalumnos,";")
     );
     END;
-    $$
+    //
 DELIMITER ;
 
 -- ? █▀█ █▀▀ █▀▀ █ █▀ ▀█▀ █▀█ █▀█
