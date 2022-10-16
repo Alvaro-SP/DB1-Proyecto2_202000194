@@ -1097,31 +1097,52 @@ create procedure ConsultarAprobacion (IN codigo INT, IN ciclo VARCHAR(45),IN ani
     IF (anio != 2022) THEN
         RETURN 'ANIO NO REGISTRADO';
     END IF;
-    
-    SELECT carnet as CARNET,
+
+    SELECT codigo as CODIGO_CURSO,
+    carnet as CARNET,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
-    creditos AS CREDITOS_POSEE
+    (SELECT IF(NOTAS.nota>=61, "APROBADO", "DESAPROBADO") AS APROBACION
     FROM ESTUDIANTE
-    JOIN ASIGNADOS ON ASIGNADOS.carnet=ESTUDIANTE.carnet
-    WHERE ASIGNADOS.id_curso_habilitado=idfound;
+    JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
+    WHERE NOTAS.id_curso_habilitado=idfound;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
 DROP procedure IF EXISTS ConsultarActas;
 DELIMITER //
-create procedure ConsultarActas (IN codigo_carrera INT)
+create procedure ConsultarActas (IN codigo_curso INT)
     begin
     -- → Código de curso (se repite en cada fila)
     -- → Sección
-    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
-    -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
-    -- DICIEMBRE”
+    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE DICIEMBRE”
     -- → Año
-    -- → Cantidad de estudiantes que llevaron el curso (o cantidad de notas 
-    -- que fueron ingresadas)
+    --! → Cantidad de estudiantes que llevaron el curso (o cantidad de notas que fueron ingresadas)
     -- → Fecha y hora de generado
-    
+    -- ? *Si no existe mostrar error
+    DECLARE idfound INT;
+    SET idfound = (SELECT codigo_curso FROM HABILITADOS WHERE codigo_curso=codigo_curso LIMIT 1);
+    IF (idfound IS NULL) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
+    -- ? CONSULTA
+    SELECT codigo_curso as CODIGO_CURSO,
+    HABILITADOS.seccion as SECCION,
+    SELECT IF(STRCMP(HABILITADOS.ciclo,"1S") = 0, "PRIMER SEMESTRE",
+            IF(STRCMP(HABILITADOS.ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
+                IF(STRCMP(HABILITADOS.ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
+                    IF(STRCMP(HABILITADOS.ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
+            ) AS CICLO,
+    2022 AS ANIO,
+    (
+        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
+        JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
+        WHERE HABILITADOS.codigo_curso = codigo_curso
+    ) AS CANT_ESTUDIANT_CURSO
+    ACTA.fechayhora AS FECHA_HORA
+    FROM HABILITADOS
+    JOIN ACTA ON ACTA.id_curso_habilitado=HABILITADOS.id
+    WHERE HABILITADOS.codigo_curso=codigo_curso;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
