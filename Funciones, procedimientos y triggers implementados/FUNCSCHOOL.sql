@@ -943,6 +943,7 @@ CREATE FUNCTION GenerarActa
     BEGIN
     DECLARE cdate DATETIME;
     DECLARE temp BOOLEAN;
+    DECLARE idfound BOOLEAN;
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
@@ -1048,6 +1049,11 @@ create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio
     -- → Carnet
     -- → Nombre completo
     -- → Créditos que posee
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
     IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
         RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
@@ -1057,15 +1063,13 @@ create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio
         RETURN 'ANIO NO REGISTRADO';
     END IF;
     -- ? Si no existe mostrar error
-    
-    SELECT registro_siif as REGISTRO_SIIF,
+
+    SELECT carnet as CARNET,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
-    fecha_nacimiento AS FECHA_DE_NACIMIENTO,
-    correo AS CORREO,
-    telefono AS TELEFONO,
-    direccion AS DIRECCION,
-    dpi AS NUMERO_DPI,
-    FROM DOCENTE WHERE registro_siif=registro_siif;
+    creditos AS CREDITOS_POSEE
+    FROM ESTUDIANTE
+    JOIN ASIGNADOS ON ASIGNADOS.carnet=ESTUDIANTE.carnet;
+    WHERE ASIGNADOS.id_curso_habilitado=idfound
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
