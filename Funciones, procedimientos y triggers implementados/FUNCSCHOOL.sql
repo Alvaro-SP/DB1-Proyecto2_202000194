@@ -343,6 +343,7 @@ CREATE FUNCTION DesasignarCurso
     BEGIN
     DECLARE idfound INT;
     DECLARE existecarne BIGINT;
+    DECLARE studentassig BIGINT;
 
 
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
@@ -363,44 +364,31 @@ CREATE FUNCTION DesasignarCurso
     END IF;
 
     -- ? validar que el estudiante ya se encontraba asignado a esa sección,
-
-
+    SET studentassig = (SELECT carnet FROM ASIGNADOS WHERE id_curso_habilitado=idfound);
+    IF (studentassig IS NULL) THEN
+        RETURN CONCAT('ERROR ESTUDIANTE NO ASIGNADO ',carne);
+    END IF;
 
     -- ? se debe de llevar un control de cada desasignación y asegurarse de que el cupo no se 
     -- ? siga viendo reducido puesto que habría un cupo más para otro estudiante.
-
-
-
-
-    DECLARE temp BOOLEAN;
-    SET temp = is_int(creditos_necesarios);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS NECESARIO NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_necesarios = ROUND(creditos_necesarios,0);
-    SET temp = is_int(creditos_otorga);
-    IF (temp = 0) THEN
-		RETURN 'ERROR CREDITOS OTORGA NECESITA SER ENTERO POSITIVO';
-	END IF;
-    SET creditos_otorga = ROUND(creditos_otorga,0);
-
-    -- ? VALIDO SI EXISTE LA CARRERA
-    DECLARE existe INT;
-    SET existe = (SELECT id FROM CARRERA WHERE id=carrera);
-    IF (existe IS NULL) THEN
-        RETURN CONCAT('ERROR NO SE HA ENCONTRADO LA CARRERA ',carrera);
+    SET cupotemp = (SELECT cupos_disponibles FROM HABILITADOS WHERE idfound = id) -- *TOMO EL CUPO DEL ID ACTUAL
+    SET cupotemp = cupotemp +1;
+    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
+    
+    
+    SET tempdesasignado = (SELECT cantidad_desasignados FROM DESASIGNADOS WHERE id_curso_habilitado=idfound);
+    IF (tempdesasignado IS NULL) THEN
+        -- ? INSERTO DESASIGNADO
+        INSERT INTO DESASIGNADOS (id, id_curso_habilitado, cantidad_total, cantidad_desasignados)
+        VALUES (NULL, idfound,0,1 );
+    ELSE
+        -- ? ACTUALIZO CANTIDAD DE DESASIGNADOS
+        tempdesasignado = tempdesasignado +1;
+        UPDATE DESASIGNADOS SET cantidad_desasignados=tempdesasignado WHERE id_curso_habilitado=idfound;
     END IF;
 
-    -- ? VALIDO OBLIGATORIO
-    IF ((obligatorio != 1) AND (obligatorio != 0) ) THEN
-        RETURN 'PARAMETRO OBLIGATORIO DEBE SER 1 o 0';
-    END IF;
 
-    -- ? INSERTO
-    INSERT INTO CURSO (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio)
-    VALUES (codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio);
-
-    RETURN "CURSO CREADO";
+    RETURN "ESTUDIANTE DESASIGNADO DEL CURSO";
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
