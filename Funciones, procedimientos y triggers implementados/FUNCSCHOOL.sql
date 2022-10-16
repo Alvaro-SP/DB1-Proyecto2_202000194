@@ -478,18 +478,66 @@ DELIMITER ;
 
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 delimiter //
-create procedure update_price (IN temp_ISBN varchar(10), IN new_price integer)
-               -> begin
-               -> update book set price=new_price where ISBN=temp_ISBN;
-               -> end; //
+create procedure update_price (IN codigo_carrera varchar(45), IN new_price integer)
+    begin
+     Código del curso
+→ Nombre del curso
+→ Es obligatorio (sí o no)
+→ Créditos necesarios
+
+    update book set price=new_price where ISBN=temp_ISBN;
+    end; //
 call update_price(001, 600); //
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
+→ Carnet
+→ Nombre completo (concatenado)
+→ Fecha de nacimiento
+→ Correo
+→ Teléfono
+→ Dirección
+→ Número de DPI
+→ Carrera
+→ Créditos que posee
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+→ Registro SIIF
+→ Nombre completo
+→ Fecha de nacimiento
+→ Correo
+→ Teléfono
+→ Dirección
+→ Número de DPI
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
+→ Carnet
+→ Nombre completo
+→ Créditos que posee
+
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+→ Código de curso (se repite en cada fila)
+→ Carnet
+→ Nombre completo
+→ “APROBADO” / “DESAPROBADO”
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+→ Código de curso (se repite en cada fila)
+→ Sección
+→ Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
+“SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
+DICIEMBRE”
+→ Año
+→ Cantidad de estudiantes que llevaron el curso (o cantidad de notas 
+que fueron ingresadas)
+→ Fecha y hora de generado
+
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+→ Código de curso
+→ Sección
+→ Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
+“SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
+DICIEMBRE”
+→ Año
+→ Cantidad de estudiantes que llevaron el curso
+→ Cantidad de estudiantes que se desasignaron
+→ Porcentaje de desasignación
+
 
 
 
