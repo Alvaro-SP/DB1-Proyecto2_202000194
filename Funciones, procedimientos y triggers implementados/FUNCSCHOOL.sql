@@ -458,9 +458,8 @@ CREATE FUNCTION GenerarActa
     IF (idfound = -1) THEN
 		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
-    -- ? Al momento de que el docente termina de ingresar notas se genera un acta, 
-    -- ? por lo que es necesario hacer la validación de que ya ingresó las notas de 
-    -- ? todos los estudiantes asignados, de lo contrario mostrar un error. 
+    -- ? Al momento de que el docente termina de ingresar notas se genera un acta, por lo que es necesario hacer la validación
+    -- ? de que ya ingresó las notas de todos los estudiantes asignados, de lo contrario mostrar un error.
 
     -- ?  Se debe de almacenar la fecha y hora exacta en que se generó el acta.
     SET cdate = now(); -- * obtengo la fecha actual
@@ -478,6 +477,7 @@ DELIMITER ;
 --? █▀▀ █▀▄ █▄█ █▄▄ ██▄ ▄█ █▀█ █░▀░█ █ ██▄ █░▀█ ░█░ █▄█   █▄▀ ██▄   █▄▀ █▀█ ░█░ █▄█ ▄█
 
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
