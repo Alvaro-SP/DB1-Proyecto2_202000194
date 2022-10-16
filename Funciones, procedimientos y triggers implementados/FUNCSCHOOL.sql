@@ -73,25 +73,26 @@ DELIMITER ;
 -- ? CURSO
 -- ? HABILITADOS
 -- ? DOCENTE
-DROP TRIGGER IF EXISTS after_insert_students;
+DROP TRIGGER IF EXISTS after_insert_docente;
 DELIMITER //
-    CREATE TRIGGER after_insert_students
+    CREATE TRIGGER after_insert_docente
     AFTER INSERT ON DOCENTE
     FOR EACH ROW
     BEGIN
         INSERT INTO HISTORIAL(fecha, descripcion, tipo, executedSQL, reverseSQL)
         VALUES(now(),
-        'Se ha realizado una acción en la tabla ESTUDIANTES',
+        'Se ha realizado una acción en la tabla DOCENTE',
         'INSERT',
-        CONCAT("INSERT INTO ESTUDIANTE (carnet,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,carrera,fechacreacion,creditos) VALUES (",NEW.carnet,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", """,NEW.carrera,""", """,NEW.fechacreacion,""", ",NEW.creditos,");"),
-        CONCAT("DELETE FROM ESTUDIANTE WHERE carnet = ",  NEW.carnet,";")
+        CONCAT("INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion) 
+        VALUES (",NEW.registro_siif,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", ",NEW.fechacreacion,");"),
+        CONCAT("DELETE FROM DOCENTE WHERE carnet = ",  NEW.carnet,";")
         );
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_alumnos;
+DROP TRIGGER IF EXISTS after_update_docente;
 DELIMITER //
-    CREATE TRIGGER after_update_students
+    CREATE TRIGGER after_update_docente
     AFTER UPDATE ON DOCENTE
     FOR EACH ROW
     BEGIN
@@ -107,9 +108,9 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_students;
+DROP TRIGGER IF EXISTS after_delete_docente;
 DELIMITER //
-    CREATE TRIGGER after_delete_students
+    CREATE TRIGGER after_delete_docente
     AFTER DELETE ON DOCENTE
     FOR EACH ROW
     BEGIN
@@ -144,7 +145,7 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_alumnos;
+DROP TRIGGER IF EXISTS after_update_students;
 DELIMITER //
     CREATE TRIGGER after_update_students
     AFTER UPDATE ON ESTUDIANTE
@@ -438,7 +439,7 @@ CREATE FUNCTION AsignarCurso
     RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
--- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
 DELIMITER //
 DROP FUNCTION IF EXISTS DesasignarCurso //
 CREATE FUNCTION DesasignarCurso
@@ -494,7 +495,7 @@ CREATE FUNCTION DesasignarCurso
     RETURN "ESTUDIANTE DESASIGNADO DEL CURSO";
     END//
 DELIMITER ;
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 9. Ingresar notas ██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
 DELIMITER //
 DROP FUNCTION IF EXISTS IngresarNota //
 CREATE FUNCTION IngresarNota
@@ -546,7 +547,7 @@ CREATE FUNCTION IngresarNota
     RETURN "NOTA AGREGADA CORRECTAMENTE";
     END//
 DELIMITER ;
--- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
+-- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█10. Generar acta █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
 DELIMITER // 
 DROP FUNCTION IF EXISTS GenerarActa //
 CREATE FUNCTION GenerarActa
@@ -603,9 +604,9 @@ DELIMITER;
 -- call ConsultarPensum(08);
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarEstudiante;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarEstudiante (IN codigo_carrera INT)
     begin
     -- → Carnet
     -- → Nombre completo (concatenado)
@@ -631,9 +632,9 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarDocente;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarDocente (IN codigo_carrera INT)
     begin
     -- → Registro SIIF
     -- → Nombre completo
@@ -647,9 +648,9 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarAsignados;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarAsignados (IN codigo_carrera INT)
     begin
     -- → Carnet
     -- → Nombre completo
@@ -659,9 +660,9 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarAprobacion;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarAprobacion (IN codigo_carrera INT)
     begin
     -- → Código de curso (se repite en cada fila)
     -- → Carnet
@@ -672,9 +673,9 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarActas;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarActas (IN codigo_carrera INT)
     begin
     -- → Código de curso (se repite en cada fila)
     -- → Sección
@@ -690,9 +691,9 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
 
-DROP procedure IF EXISTS ConsltarPensum;
+DROP procedure IF EXISTS ConsultarDesasignacion;
 DELIMITER //
-create procedure ConsultarPensum (IN codigo_carrera INT)
+create procedure ConsultarDesasignacion (IN codigo_carrera INT)
     begin
     -- → Código de curso
     -- → Sección
