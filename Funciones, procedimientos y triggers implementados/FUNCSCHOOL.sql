@@ -1036,7 +1036,7 @@ create procedure ConsultarDocente (IN registro_siif BIGINT)
     telefono AS TELEFONO,
     direccion AS DIRECCION,
     dpi AS NUMERO_DPI,
-    FROM ESTUDIANTE WHERE carnet=carne;
+    FROM DOCENTE WHERE registro_siif=registro_siif;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
