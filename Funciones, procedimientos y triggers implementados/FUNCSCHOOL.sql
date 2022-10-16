@@ -274,27 +274,27 @@ CREATE FUNCTION AsignarCurso
     DECLARE idfound INT;
     DECLARE existe INT;
     DECLARE idtemp INT;
+    DECLARE existecarne BIGINT;
     DECLARE creditosnecesarios INT;
     DECLARE creditosestudiante INT;
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
 		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
 
-    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
-    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
-        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
-    END IF;
     -- ? Validar que el carnet exista
-    
-    SET existe = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
-    IF (existe IS NULL) THEN
+    SET existecarne = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
+    IF (existecarne IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET ',carne);
     END IF;
     
 
-    -- ? Se debe validar que no se encuentre ya asignado a la misma u otra sección,
+    -- ? Se debe validar que no se encuentre ya asignado a la misma u otra sección,  🤐
     SET existe = NULL;
     SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo);
     IF (existe IS NOT NULL) THEN
@@ -328,6 +328,9 @@ CREATE FUNCTION AsignarCurso
     -- ? INSERTO   Se realiza la asignación de un estudiante a determinado curso.
     INSERT INTO ASIGNADOS (id, id_curso_habilitado, carnet, boolasignado)
     VALUES (NULL, idfound, carnet, 1);
+    -- ! FINALMENTE SOLO QUEDA RESTAR UNO A LOS CUPOS DISPONIBLES EN EL CURSO
+    SET cupotemp = cupotemp -1;
+    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
     RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
@@ -335,9 +338,33 @@ DELIMITER ;
 DELIMITER // -- ! █▄██▄██▄██▄██▄██▄██▄██ 8. Desasignación de curso █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DROP FUNCTION IF EXISTS DesasignarCurso //
 CREATE FUNCTION DesasignarCurso
-    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT , nota INT) RETURNS VARCHAR(65)
+    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
     deterministic
     BEGIN
+    DECLARE idfound INT;
+    DECLARE existecarne BIGINT;
+    -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
+    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+        RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
+    END IF;
+    -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
+    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    IF (idfound = -1) THEN
+		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
+	END IF;
+    -- ? Validar que el carnet exista
+    SET existecarne = (SELECT carnet FROM ESTUDIANTE WHERE carnet=carne);
+    IF (existecarne IS NULL) THEN
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET',carne);
+    END IF;
+
+    validar que el estudiante ya se encontraba asignado a esa sección, 
+    se debe de llevar un control de cada desasignación y asegurarse de que el cupo no se 
+    siga viendo reducido puesto que habría un cupo más para otro estudiante.
+
+
+
+
     DECLARE temp BOOLEAN;
     SET temp = is_int(creditos_necesarios);
     IF (temp = 0) THEN
