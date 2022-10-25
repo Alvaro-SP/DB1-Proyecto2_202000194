@@ -655,7 +655,7 @@ create procedure ConsultarActas (IN codigo_curso INT)
         SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
         JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
         WHERE HABILITADOS.codigo_curso = codigo_curso
-    ) AS CANT_ESTUDIANT_CURSO
+    ) AS CANT_ESTUDIANT_CURSO,
     ACTA.fechayhora AS FECHA_HORA
     FROM HABILITADOS
     JOIN ACTA ON ACTA.id_curso_habilitado=HABILITADOS.id
@@ -702,14 +702,14 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     -- ? CONSULTA
     SELECT codigo as CODIGO_CURSO,
     seccion as SECCION,
-    SELECT IF(STRCMP(ciclo,"1S") = 0, "PRIMER SEMESTRE",
+    (SELECT IF(STRCMP(ciclo,"1S") = 0, "PRIMER SEMESTRE",
             IF(STRCMP(ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
                 IF(STRCMP(ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
                     IF(STRCMP(ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
-            ) AS CICLO,
+            )) AS CICLO,
     2022 AS ANIO,
     -- → Cantidad de estudiantes que llevaron el curso
-    cantllevaroncurso AS CANT_ESTUDIANT_CURSO
+    cantllevaroncurso AS CANT_ESTUDIANT_CURSO,
     -- → Cantidad de estudiantes que se desasignaron
     cantestudiantes AS ESTUDIANTES_DESASIGNADOS,
     -- → Porcentaje de desasignación
@@ -899,7 +899,7 @@ DELIMITER //
         'Se ha realizado una acción en la tabla DOCENTE',
         'INSERT',
         CONCAT("INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion) VALUES (",NEW.registro_siif,", """,NEW.nombres,""", """,NEW.apellidos,""", """,NEW.fecha_nacimiento,""", """,NEW.correo,""", """,NEW.telefono,""", """,NEW.direccion,""", """,NEW.dpi,""", ",NEW.fechacreacion,");"),
-        CONCAT("DELETE FROM DOCENTE WHERE carnet = ",  NEW.carnet,";")
+        CONCAT("DELETE FROM DOCENTE WHERE registro_siif = ",  NEW.registro_siif,";")
         );
     END;//
 DELIMITER ;
