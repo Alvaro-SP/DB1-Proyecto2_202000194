@@ -5,7 +5,7 @@
 
 --* █▀▀ █░█ █▄░█ █▀▀ ▀█▀ █ █▀█ █▄░█ █▀   
 --* █▀░ █▄█ █░▀█ █▄▄ ░█░ █ █▄█ █░▀█ ▄█   
-DELIMITER // -- ************************************************************
+DELIMITER //
 DROP FUNCTION IF EXISTS ValidarCorreo //
 CREATE FUNCTION ValidarCorreo(correo VARCHAR(45)) RETURNS BOOLEAN
     deterministic
@@ -20,7 +20,7 @@ CREATE FUNCTION ValidarCorreo(correo VARCHAR(45)) RETURNS BOOLEAN
     RETURN (valido);
     END //
 DELIMITER ;
-DELIMITER //  -- ************************************************************
+DELIMITER //
 DROP FUNCTION IF EXISTS ValidarLetras //
 CREATE FUNCTION ValidarLetras(correo VARCHAR(45)) RETURNS BOOLEAN
     deterministic
@@ -36,7 +36,7 @@ CREATE FUNCTION ValidarLetras(correo VARCHAR(45)) RETURNS BOOLEAN
     END //
 DELIMITER ;
 
-DELIMITER //    -- ************************************************************
+DELIMITER //
 DROP FUNCTION IF EXISTS is_int //
 CREATE FUNCTION is_int(num INT) RETURNS BOOLEAN
     deterministic
@@ -52,16 +52,15 @@ CREATE FUNCTION is_int(num INT) RETURNS BOOLEAN
     END //
 DELIMITER ;
 
-DELIMITER //    -- ************************************************************
+DELIMITER //
 DROP FUNCTION IF EXISTS SEARCH_COURSE //
-CREATE FUNCTION  SEARCH_COURSE(codigo INT, ciclo VARCHAR(45), seccion VARCHAR(45)) RETURNS INT
+CREATE FUNCTION  SEARCH_COURSE(codigo INT, ciclo_ VARCHAR(45), seccion_ VARCHAR(45)) RETURNS INT
     deterministic
     BEGIN
     DECLARE valido INT;
     -- * valido con el regex de num
-    IF (num>=0)  THEN
-        SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo AND seccion=seccion INTO valido;
-    ELSE
+    SET valido = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo_ AND seccion=seccion_);
+    IF (valido IS NULL)  THEN
         SET valido = -1;
     END IF;
     RETURN (valido);
@@ -78,7 +77,7 @@ DELIMITER ;
 DELIMITER // 
 DROP FUNCTION IF EXISTS RegistrarEstudiante //
 CREATE FUNCTION RegistrarEstudiante
-    (  
+    (
     carnet BIGINT,
     nombres VARCHAR(45),
     apellidos VARCHAR(45),
@@ -87,13 +86,13 @@ CREATE FUNCTION RegistrarEstudiante
     telefono INT,
     direccion VARCHAR(45),
     dpi BIGINT,
-    carrera INT 
+    carrera INT
     ) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE cdate DATETIME;
     DECLARE temp BOOLEAN;
-    SET cdate = now(); -- * obtengo la fecha actual    
+    SET cdate = now(); -- * obtengo la fecha actual
     SET temp = ValidarCorreo(correo);
     IF (temp = 0) THEN
 		RETURN 'ERROR DE CORREO VERIFICAR EL FORMATO DE CORREO';
@@ -119,7 +118,7 @@ CREATE FUNCTION CrearCarrera(nombre VARCHAR(45)) RETURNS VARCHAR(65)
 		RETURN 'ERROR EL NOMBRE SOLO DEBE TENER LETRAS';
 	END IF;
     INSERT INTO CARRERA (nombre) VALUES (nombre);
-    RETURN "ESTUDIANTE GUARDADO";
+    RETURN "CARRERA GUARDADA";
     END//
 DELIMITER ;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 3. Registrar docente █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█😎
@@ -134,20 +133,27 @@ CREATE FUNCTION RegistrarDocente
     telefono INT,
     direccion VARCHAR(45),
     dpi BIGINT,
-    registro_siif BIGINT
+    registro_siif_ BIGINT
     ) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE cdate DATETIME;
     DECLARE temp BOOLEAN;
-    SET cdate = now(); -- * obtengo la fecha actual    
+    DECLARE existeSIIF BIGINT;
+    SET cdate = now(); -- * obtengo la fecha actual
     SET temp = ValidarCorreo(correo);
     IF (temp = 0) THEN
 		RETURN 'ERROR DE CORREO VERIFICAR EL FORMATO DE CORREO';
 	END IF;
+    -- ? Se debe validar que el docente no se haya creado.
+    SET existeSIIF = (SELECT registro_siif FROM DOCENTE WHERE registro_siif=registro_siif_);
+    IF (existeSIIF IS NOT NULL) THEN
+        RETURN CONCAT('ERROR YA EXISTE UN DOCENTE CON ESE ID SIIF',existeSIIF);
+    END IF;
+
 
     INSERT INTO DOCENTE (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,fechacreacion)
-    VALUES (registro_siif,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,cdate);
+    VALUES (registro_siif_,nombres,apellidos,fecha_nacimiento,correo,telefono,direccion,dpi,cdate);
 
     RETURN "DOCENTE GUARDADO";
     END//
@@ -198,17 +204,25 @@ DELIMITER ;
 DELIMITER //
 DROP FUNCTION IF EXISTS HabilitarCurso //
 CREATE FUNCTION HabilitarCurso
-    (codigo_curso INT ,ciclo VARCHAR(45), docente BIGINT, cupo INT, seccion VARCHAR(45)) RETURNS VARCHAR(65)
+    (codigo_curso_ INT ,ciclo VARCHAR(45), docente BIGINT, cupo INT, seccion_ VARCHAR(45)) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE existe INT;
     DECLARE existeSIIF BIGINT;
     DECLARE temp BOOLEAN;
-
+    DECLARE codigotemp INT;
+    DECLARE secciontemp VARCHAR(45);
     -- ? *Se debe validar que el curso exista
-    SET existe = (SELECT codigo FROM CURSO WHERE codigo=codigo_curso);
+    SET existe = (SELECT codigo FROM CURSO WHERE codigo=codigo_curso_);
     IF (existe IS NULL) THEN
-        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CURSO ',codigo_curso);
+        RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CURSO ',codigo_curso_);
+    END IF;
+
+    -- ?  Se debe validar que la sección no se repita.
+    SET codigotemp = (SELECT codigo_curso FROM HABILITADOS WHERE codigo_curso=codigo_curso_ AND seccion=seccion_);
+    SET secciontemp = (SELECT seccion FROM HABILITADOS WHERE codigo_curso=codigo_curso_ AND seccion=seccion_);
+    IF ((codigotemp IS NOT NULL) AND (secciontemp IS NOT NULL)) THEN
+        RETURN CONCAT('ERROR EL CURSO Y SECCION YA ESTA HABILITADO ',codigotemp);
     END IF;
 
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
@@ -227,10 +241,10 @@ CREATE FUNCTION HabilitarCurso
 	END IF;
     SET cupo = ROUND(cupo,0);
     -- ? *Una letra y guardarla en mayúscula
-    SET seccion = UPPER(seccion);
+    SET seccion_ = UPPER(seccion_);
     -- ? INSERTO
-    INSERT INTO HABILITADOS (id, codigo_curso, ciclo, seccion, docente, cupo_maximo, anio, cant_estudiantes, cupos_disponibles, dia, horario)
-    VALUES (NULL,codigo_curso,ciclo,seccion,docente,cupo,2022,0,cupo);
+    INSERT INTO HABILITADOS (id, codigo_curso, ciclo, seccion, docente, cupo_maximo, anio, cant_estudiantes, cupos_disponibles)
+    VALUES (NULL,codigo_curso_,ciclo,seccion_,docente,cupo,2022,0,cupo);
     RETURN "CURSO HABILITADO CORRECTAMENTE";
     END//
 DELIMITER ;
@@ -253,7 +267,7 @@ CREATE FUNCTION AgregarHorario
     END IF;
 
     -- ? INSERTO
-    INSERT INTO CURSO (id, id_curso_habilitado, dia, horario)
+    INSERT INTO HORARIO (id, id_curso_habilitado, dia, horario)
     VALUES (NULL,id_curso_habilitado,dia,horario);
     RETURN "HORARIO AGREGADO CORRECTAMENTE AL CURSO";
     END//
@@ -262,7 +276,7 @@ DELIMITER ;
 DELIMITER //
 DROP FUNCTION IF EXISTS AsignarCurso //
 CREATE FUNCTION AsignarCurso
-    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
+    (codigo_ INT ,ciclo_ VARCHAR(45),seccion_ VARCHAR(45), carne BIGINT) RETURNS VARCHAR(65)
     deterministic
     BEGIN
 
@@ -275,12 +289,20 @@ CREATE FUNCTION AsignarCurso
     DECLARE carreraestudiante INT;
     DECLARE carreradelcurso INT;
     DECLARE cupotemp INT;
+    DECLARE isasignado INT;
+    -- ?  Se debe validar que no se encuentre ya asignado a la misma u otra sección
+    -- SET isasignado = (SELECT id_curso_habilitado FROM ASIGNADOS
+    --     JOIN HABILITADOS ON HABILITADOS.id=ASIGNADOS.id_curso_habilitado
+    --     WHERE HABILITADOS.codigo_curso=codigo AND ASIGNADOS.carnet=carne LIMIT 1);
+    -- IF (isasignado IS NOT NULL) THEN
+    --     RETURN CONCAT('ERROR YA SE ENCUENTRA ASIGNADO A LA MISMA U OTRA SECCION ',isasignado);
+    -- END IF;
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
-    IF ((SELECT STRCMP(ciclo, '1S') != 0) AND (SELECT STRCMP(ciclo, '2S') != 0) AND (SELECT STRCMP(ciclo, 'VJ') != 0) AND (SELECT STRCMP(ciclo, 'VD') != 0)) THEN
+    IF ((SELECT STRCMP(ciclo_, '1S') != 0) AND (SELECT STRCMP(ciclo_, '2S') != 0) AND (SELECT STRCMP(ciclo_, 'VJ') != 0) AND (SELECT STRCMP(ciclo_, 'VD') != 0)) THEN
         RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
     END IF;
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
-    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    SET idfound = SEARCH_COURSE(codigo_, ciclo_, seccion_); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
 		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
@@ -294,19 +316,19 @@ CREATE FUNCTION AsignarCurso
 
     -- ? Se debe validar que no se encuentre ya asignado a la misma u otra sección,  OJOOOOOOOOOOOOOOO
     SET existe = NULL;
-    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo);
+    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo_ AND ciclo=ciclo_);
     IF (existe IS NOT NULL) THEN
         RETURN CONCAT('ERROR EL ESTUDIANTE YA ESTA ASIGNADO A LA MISMA U OTRA SECCION ',carne);
     END IF;
     -- ? que cuente con los créditos necesarios
-    SET creditosnecesarios = (SELECT creditos_necesarios FROM CURSO WHERE codigo=codigo);
+    SET creditosnecesarios = (SELECT creditos_necesarios FROM CURSO WHERE codigo=codigo_);
     SET creditosestudiante = (SELECT creditos FROM ESTUDIANTE WHERE carnet = carne);
     IF (creditosestudiante < creditosnecesarios) THEN
         RETURN 'ERROR EL ESTUDIANTE NO POSEE CREDITOS SUFICIENTES ';
     END IF;
     -- ? que pertenezca a un curso correspondiente a su carrera o área común,
     SET carreraestudiante = (SELECT carrera FROM ESTUDIANTE WHERE carnet = carne);
-    SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo);
+    SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo_);
     IF (carreraestudiante != 0)   THEN
         IF (carreraestudiante != carreradelcurso) THEN
             RETURN CONCAT('ERROR EL CURSO NO PERTENECE A LA CARRERA DEL ESTUDIANTE ',carne);
@@ -314,7 +336,7 @@ CREATE FUNCTION AsignarCurso
     END IF;
     -- ? también validar que la sección que elige el estudiante sí existe
     SET existe = NULL;
-    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo AND ciclo=ciclo AND seccion=seccion);
+    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo_ AND ciclo=ciclo_ AND seccion=seccion_);
     IF (existe IS NOT NULL) THEN
         RETURN CONCAT('ERROR LA SECCION NO ESTA ENTRE CURSOS HABILITADOS',carne);
     END IF;
@@ -325,7 +347,7 @@ CREATE FUNCTION AsignarCurso
     END IF;
     -- ? INSERTO   Se realiza la asignación de un estudiante a determinado curso.
     INSERT INTO ASIGNADOS (id, id_curso_habilitado, carnet, boolasignado)
-    VALUES (NULL, idfound, carnet, 1);
+    VALUES (NULL, idfound, carne, 1);
     -- ! FINALMENTE SOLO QUEDA RESTAR UNO A LOS CUPOS DISPONIBLES EN EL CURSO
     SET cupotemp = cupotemp -1;
     UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
@@ -485,6 +507,38 @@ DROP procedure IF EXISTS ConsultarAprobacion;
 DROP procedure IF EXISTS ConsultarActas;
 DROP procedure IF EXISTS ConsultarDesasignacion;
 
+DROP TRIGGER IF EXISTS after_insert_CARRERA;
+DROP TRIGGER IF EXISTS after_update_CARRERA;
+DROP TRIGGER IF EXISTS after_delete_CARRERA;
+DROP TRIGGER IF EXISTS after_insert_curso;
+DROP TRIGGER IF EXISTS after_update_curso;
+DROP TRIGGER IF EXISTS after_delete_curso;
+DROP TRIGGER IF EXISTS after_insert_habilitados;
+DROP TRIGGER IF EXISTS after_update_habilitados;
+DROP TRIGGER IF EXISTS after_delete_habilitados;
+DROP TRIGGER IF EXISTS after_insert_docente;
+DROP TRIGGER IF EXISTS after_update_docente;
+DROP TRIGGER IF EXISTS after_delete_docente;
+DROP TRIGGER IF EXISTS after_insert_DESASIGNADOS;
+DROP TRIGGER IF EXISTS after_update_DESASIGNADOS;
+DROP TRIGGER IF EXISTS after_delete_DESASIGNADOS;
+DROP TRIGGER IF EXISTS after_delete_students;
+DROP TRIGGER IF EXISTS after_update_students;
+DROP TRIGGER IF EXISTS after_insert_students;
+DROP TRIGGER IF EXISTS after_delete_HORARIO;
+DROP TRIGGER IF EXISTS after_update_HORARIO;
+DROP TRIGGER IF EXISTS after_insert_HORARIO;
+DROP TRIGGER IF EXISTS after_insert_ASIGNADOS;
+DROP TRIGGER IF EXISTS after_update_ASIGNADOS;
+DROP TRIGGER IF EXISTS after_delete_ASIGNADOS;
+DROP TRIGGER IF EXISTS after_insert_ACTA;
+DROP TRIGGER IF EXISTS after_update_ACTA;
+DROP TRIGGER IF EXISTS after_delete_ACTA;
+DROP TRIGGER IF EXISTS after_insert_NOTAS;
+DROP TRIGGER IF EXISTS after_delete_NOTAS;
+DROP TRIGGER IF EXISTS after_update_NOTAS;
+
+
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 1. Consultar pensum █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DELIMITER //
 create procedure ConsultarPensum (IN codigo_carrera INT)
@@ -508,7 +562,6 @@ create procedure ConsultarPensum (IN codigo_carrera INT)
 DELIMITER;
 -- call ConsultarPensum(08);
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█ 2. Consultar estudiante   █▄██▄██▄██▄██▄██▄██▄██▄██▄██
-
 DELIMITER //
 create procedure ConsultarEstudiante (IN carne BIGINT)
     begin
@@ -533,9 +586,7 @@ create procedure ConsultarEstudiante (IN carne BIGINT)
     FROM ESTUDIANTE WHERE carnet=carne;
     end; //
 DELIMITER;
-
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-
 DELIMITER //
 create procedure ConsultarDocente (IN registro_siif BIGINT)
     begin
@@ -557,9 +608,7 @@ create procedure ConsultarDocente (IN registro_siif BIGINT)
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
-
 DELIMITER //
-
 create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio INT,IN seccion VARCHAR(45))
     begin
     -- → Carnet
@@ -590,7 +639,6 @@ create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄█ 5. Consultar aprobaciones █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-
 DELIMITER //
 create procedure ConsultarAprobacion (IN codigo INT, IN ciclo VARCHAR(45),IN anio INT,IN seccion VARCHAR(45))
     begin
@@ -623,7 +671,6 @@ create procedure ConsultarAprobacion (IN codigo INT, IN ciclo VARCHAR(45),IN ani
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
-
 DELIMITER //
 create procedure ConsultarActas (IN codigo_curso INT)
     begin
@@ -663,7 +710,6 @@ create procedure ConsultarActas (IN codigo_curso INT)
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
-
 DELIMITER //
 create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN anio INT,IN seccion VARCHAR(45))
     begin
@@ -729,19 +775,11 @@ DELIMITER;
 
 
 
-
-
-
-
-
-
-
-
 --* ▀█▀ █▀█ █ █▀▀ █▀▀ █▀▀ █▀█ █▀
 --* ░█░ █▀▄ █ █▄█ █▄█ ██▄ █▀▄ ▄█
 
+
 -- ? CARRERA
-DROP TRIGGER IF EXISTS after_insert_CARRERA;
 DELIMITER //
     CREATE TRIGGER after_insert_CARRERA
     AFTER INSERT ON CARRERA
@@ -756,7 +794,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_CARRERA;
 DELIMITER //
     CREATE TRIGGER after_update_CARRERA
     AFTER UPDATE ON CARRERA
@@ -773,7 +810,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_CARRERA;
 DELIMITER //
     CREATE TRIGGER after_delete_CARRERA
     AFTER DELETE ON CARRERA
@@ -790,7 +826,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? CURSO
-DROP TRIGGER IF EXISTS after_insert_curso;
 DELIMITER //
     CREATE TRIGGER after_insert_curso
     AFTER INSERT ON CURSO
@@ -805,7 +840,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_curso;
 DELIMITER //
     CREATE TRIGGER after_update_curso
     AFTER UPDATE ON CURSO
@@ -822,7 +856,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_curso;
 DELIMITER //
     CREATE TRIGGER after_delete_curso
     AFTER DELETE ON CURSO
@@ -839,7 +872,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? HABILITADOS
-DROP TRIGGER IF EXISTS after_insert_habilitados;
 DELIMITER //
     CREATE TRIGGER after_insert_habilitados
     AFTER INSERT ON HABILITADOS
@@ -854,7 +886,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_habilitados;
 DELIMITER //
     CREATE TRIGGER after_update_habilitados
     AFTER UPDATE ON HABILITADOS
@@ -871,7 +902,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_habilitados;
 DELIMITER //
     CREATE TRIGGER after_delete_habilitados
     AFTER DELETE ON HABILITADOS
@@ -888,7 +918,7 @@ DELIMITER //
 DELIMITER ;
 
 -- ? DOCENTE
-DROP TRIGGER IF EXISTS after_insert_docente;
+
 DELIMITER //
     CREATE TRIGGER after_insert_docente
     AFTER INSERT ON DOCENTE
@@ -904,7 +934,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_docente;
 DELIMITER //
     CREATE TRIGGER after_update_docente
     AFTER UPDATE ON DOCENTE
@@ -922,7 +951,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_docente;
 DELIMITER //
     CREATE TRIGGER after_delete_docente
     AFTER DELETE ON DOCENTE
@@ -937,9 +965,8 @@ DELIMITER //
         );
     END;//
 DELIMITER ;
-
 -- ? DESASIGNADOS
-DROP TRIGGER IF EXISTS after_insert_DESASIGNADOS;
+
 DELIMITER //
     CREATE TRIGGER after_insert_DESASIGNADOS
     AFTER INSERT ON DESASIGNADOS
@@ -954,7 +981,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_DESASIGNADOS;
 DELIMITER //
     CREATE TRIGGER after_update_DESASIGNADOS
     AFTER UPDATE ON DESASIGNADOS
@@ -971,7 +997,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_DESASIGNADOS;
 DELIMITER //
     CREATE TRIGGER after_delete_DESASIGNADOS
     AFTER DELETE ON DESASIGNADOS
@@ -988,7 +1013,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? ASIGNADOS
-DROP TRIGGER IF EXISTS after_insert_ASIGNADOS;
 DELIMITER //
     CREATE TRIGGER after_insert_ASIGNADOS
     AFTER INSERT ON ASIGNADOS
@@ -1003,7 +1027,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_ASIGNADOS;
 DELIMITER //
     CREATE TRIGGER after_update_ASIGNADOS
     AFTER UPDATE ON ASIGNADOS
@@ -1020,7 +1043,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_ASIGNADOS;
 DELIMITER //
     CREATE TRIGGER after_delete_ASIGNADOS
     AFTER DELETE ON ASIGNADOS
@@ -1037,7 +1059,7 @@ DELIMITER //
 DELIMITER ;
 
 -- ? ACTA
-DROP TRIGGER IF EXISTS after_insert_ACTA;
+
 DELIMITER //
     CREATE TRIGGER after_insert_ACTA
     AFTER INSERT ON ACTA
@@ -1052,7 +1074,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_ACTA;
 DELIMITER //
     CREATE TRIGGER after_update_ACTA
     AFTER UPDATE ON ACTA
@@ -1069,7 +1090,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_ACTA;
 DELIMITER //
     CREATE TRIGGER after_delete_ACTA
     AFTER DELETE ON ACTA
@@ -1086,7 +1106,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? NOTAS
-DROP TRIGGER IF EXISTS after_insert_NOTAS;
 DELIMITER //
     CREATE TRIGGER after_insert_NOTAS
     AFTER INSERT ON CARRERA
@@ -1101,7 +1120,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_NOTAS;
 DELIMITER //
     CREATE TRIGGER after_update_NOTAS
     AFTER UPDATE ON NOTAS
@@ -1118,7 +1136,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_NOTAS;
 DELIMITER //
     CREATE TRIGGER after_delete_NOTAS
     AFTER DELETE ON NOTAS
@@ -1135,7 +1152,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? HORARIO
-DROP TRIGGER IF EXISTS after_insert_HORARIO;
 DELIMITER //
     CREATE TRIGGER after_insert_HORARIO
     AFTER INSERT ON CARRERA
@@ -1150,7 +1166,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_HORARIO;
 DELIMITER //
     CREATE TRIGGER after_update_HORARIO
     AFTER UPDATE ON CARRERA
@@ -1167,7 +1182,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_HORARIO;
 DELIMITER //
     CREATE TRIGGER after_delete_HORARIO
     AFTER DELETE ON HORARIO
@@ -1184,7 +1198,6 @@ DELIMITER //
 DELIMITER ;
 
 -- ? ESTUDIANTE
-DROP TRIGGER IF EXISTS after_insert_students;
 DELIMITER //
     CREATE TRIGGER after_insert_students
     AFTER INSERT ON ESTUDIANTE
@@ -1200,7 +1213,6 @@ DELIMITER //
     END;//
 DELIMITER ;
 -- Antes de actualizar un registro, almacenar su sentencia UPDATE para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_update_students;
 DELIMITER //
     CREATE TRIGGER after_update_students
     AFTER UPDATE ON ESTUDIANTE
@@ -1218,7 +1230,6 @@ DELIMITER //
     //
 DELIMITER ;
 -- Antes de borrar un registro, almacenar su sentencia INSERT, para revertirlo a su estado anterior.
-DROP TRIGGER IF EXISTS after_delete_students;
 DELIMITER //
     CREATE TRIGGER after_delete_students
     AFTER DELETE ON ESTUDIANTE
@@ -1233,4 +1244,7 @@ DELIMITER //
         );
     END;//
 DELIMITER ;
+
+
+
 
