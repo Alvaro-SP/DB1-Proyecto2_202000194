@@ -120,6 +120,10 @@ SELECT ConsultarActas (11);
 
 call ConsultarDocente(1);
 
-
+SELECT AgregarHorario(1, 88, '7:00-11:30');
+SELECT AgregarHorario(1, 2, '7:00-11:30');
+SELECT AgregarHorario(1, 3, '7:00-11:30');
+SELECT AgregarHorario(1, 4, '7:00-11:30');
+SELECT AgregarHorario(1, 5, '7:00-11:30');
 
 
