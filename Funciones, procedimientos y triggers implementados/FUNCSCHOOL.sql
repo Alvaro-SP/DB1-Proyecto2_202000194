@@ -290,13 +290,14 @@ CREATE FUNCTION AsignarCurso
     DECLARE carreradelcurso INT;
     DECLARE cupotemp INT;
     DECLARE isasignado INT;
+    DECLARE cantestudiantestemp INT;
     -- ?  Se debe validar que no se encuentre ya asignado a la misma u otra sección
-    -- SET isasignado = (SELECT id_curso_habilitado FROM ASIGNADOS
-    --     JOIN HABILITADOS ON HABILITADOS.id=ASIGNADOS.id_curso_habilitado
-    --     WHERE HABILITADOS.codigo_curso=codigo AND ASIGNADOS.carnet=carne LIMIT 1);
-    -- IF (isasignado IS NOT NULL) THEN
-    --     RETURN CONCAT('ERROR YA SE ENCUENTRA ASIGNADO A LA MISMA U OTRA SECCION ',isasignado);
-    -- END IF;
+    SET isasignado = (SELECT id_curso_habilitado FROM ASIGNADOS
+        JOIN HABILITADOS ON HABILITADOS.id=ASIGNADOS.id_curso_habilitado
+        WHERE HABILITADOS.codigo_curso=codigo_ AND ASIGNADOS.carnet=carne LIMIT 1);
+    IF (isasignado IS NOT NULL) THEN
+        RETURN CONCAT('ERROR YA SE ENCUENTRA ASIGNADO A LA MISMA U OTRA SECCION ',isasignado);
+    END IF;
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
     IF ((SELECT STRCMP(ciclo_, '1S') != 0) AND (SELECT STRCMP(ciclo_, '2S') != 0) AND (SELECT STRCMP(ciclo_, 'VJ') != 0) AND (SELECT STRCMP(ciclo_, 'VD') != 0)) THEN
         RETURN 'ERROR EL CICLO DEBE SER 1S, 2S, VJ, VD';
@@ -312,14 +313,7 @@ CREATE FUNCTION AsignarCurso
     IF (existecarne IS NULL) THEN
         RETURN CONCAT('ERROR NO SE HA ENCONTRADO EL CARNET ',carne);
     END IF;
-    
 
-    -- ? Se debe validar que no se encuentre ya asignado a la misma u otra sección,  OJOOOOOOOOOOOOOOO
-    SET existe = NULL;
-    SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo_ AND ciclo=ciclo_);
-    IF (existe IS NOT NULL) THEN
-        RETURN CONCAT('ERROR EL ESTUDIANTE YA ESTA ASIGNADO A LA MISMA U OTRA SECCION ',carne);
-    END IF;
     -- ? que cuente con los créditos necesarios
     SET creditosnecesarios = (SELECT creditos_necesarios FROM CURSO WHERE codigo=codigo_);
     SET creditosestudiante = (SELECT creditos FROM ESTUDIANTE WHERE carnet = carne);
@@ -329,7 +323,7 @@ CREATE FUNCTION AsignarCurso
     -- ? que pertenezca a un curso correspondiente a su carrera o área común,
     SET carreraestudiante = (SELECT carrera FROM ESTUDIANTE WHERE carnet = carne);
     SET carreradelcurso = (SELECT carrera FROM CURSO WHERE codigo = codigo_);
-    IF (carreraestudiante != 0)   THEN
+    IF (carreradelcurso != 1)   THEN
         IF (carreraestudiante != carreradelcurso) THEN
             RETURN CONCAT('ERROR EL CURSO NO PERTENECE A LA CARRERA DEL ESTUDIANTE ',carne);
         END IF;
@@ -337,7 +331,7 @@ CREATE FUNCTION AsignarCurso
     -- ? también validar que la sección que elige el estudiante sí existe
     SET existe = NULL;
     SET existe = (SELECT id FROM HABILITADOS WHERE codigo_curso=codigo_ AND ciclo=ciclo_ AND seccion=seccion_);
-    IF (existe IS NOT NULL) THEN
+    IF (existe IS NULL) THEN
         RETURN CONCAT('ERROR LA SECCION NO ESTA ENTRE CURSOS HABILITADOS',carne);
     END IF;
     -- ? y que no ha alcanzado el cupo máximo, de lo contrario mostrar una explicación del error.
@@ -349,8 +343,13 @@ CREATE FUNCTION AsignarCurso
     INSERT INTO ASIGNADOS (id, id_curso_habilitado, carnet, boolasignado)
     VALUES (NULL, idfound, carne, 1);
     -- ! FINALMENTE SOLO QUEDA RESTAR UNO A LOS CUPOS DISPONIBLES EN EL CURSO
-    SET cupotemp = cupotemp -1;
-    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound; -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
+    SET cupotemp = cupotemp -1; 
+    -- *actualizo el cupo del id encontrado con (codigo,ciclo,seccion)
+    UPDATE HABILITADOS SET cupos_disponibles=cupotemp WHERE id=idfound;
+    -- ! Y ACTUALIZO LA CANTIDAD DE ESTUDIANTES
+    SET cantestudiantestemp = (SELECT cant_estudiantes FROM HABILITADOS WHERE idfound = id);
+    SET cantestudiantestemp = cantestudiantestemp + 1;
+    UPDATE HABILITADOS SET cant_estudiantes=cantestudiantestemp WHERE id=idfound;
     RETURN "ESTUDIANTE ASIGNADO CON EXITO AL CURSO";
     END//
 DELIMITER ;
@@ -366,6 +365,7 @@ CREATE FUNCTION DesasignarCurso
     DECLARE studentassig BIGINT;
     DECLARE cupotemp INT;
     DECLARE tempdesasignado INT;
+    DECLARE cantestudiantestemp INT;
 
 
     -- ? *Solamente puede aceptar los siguientes valores: ‘1S’, ’2S’, ’VJ’, ’VD’
@@ -386,7 +386,7 @@ CREATE FUNCTION DesasignarCurso
     END IF;
 
     -- ? validar que el estudiante ya se encontraba asignado a esa sección,
-    SET studentassig = (SELECT carnet FROM ASIGNADOS WHERE id_curso_habilitado=idfound);
+    SET studentassig = (SELECT carnet FROM ASIGNADOS WHERE id_curso_habilitado=idfound LIMIT 1);
     IF (studentassig IS NULL) THEN
         RETURN CONCAT('ERROR ESTUDIANTE NO ASIGNADO ',carne);
     END IF;
@@ -407,7 +407,10 @@ CREATE FUNCTION DesasignarCurso
         SET tempdesasignado = tempdesasignado +1;
         UPDATE DESASIGNADOS SET cantidad_desasignados=tempdesasignado WHERE id_curso_habilitado=idfound;
     END IF;
-
+    -- ! Y ACTUALIZO LA CANTIDAD DE ESTUDIANTES
+    SET cantestudiantestemp = (SELECT cant_estudiantes FROM HABILITADOS WHERE idfound = id);
+    SET cantestudiantestemp = cantestudiantestemp - 1;
+    UPDATE HABILITADOS SET cant_estudiantes=cantestudiantestemp WHERE id=idfound;
 
     RETURN "ESTUDIANTE DESASIGNADO DEL CURSO";
     END//
@@ -416,7 +419,7 @@ DELIMITER ;
 DELIMITER //
 DROP FUNCTION IF EXISTS IngresarNota //
 CREATE FUNCTION IngresarNota
-    (codigo INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT, nota DECIMAL) RETURNS VARCHAR(65)
+    (codigo_ INT ,ciclo VARCHAR(45),seccion VARCHAR(45), carne BIGINT, nota DECIMAL) RETURNS VARCHAR(65)
     deterministic
     BEGIN
     DECLARE temp BOOLEAN;
@@ -449,14 +452,15 @@ CREATE FUNCTION IngresarNota
     -- ? Si el estudiante aprobó el curso (Nota >= 61) entonces se suma la cantidad de créditos 
     -- ? que posee el estudiante con la cantidad de créditos que otorga el curso aprobado.
     IF (notatemp >= 61) THEN
-        SET creditoscurso = (SELECT creditos_otorga FROM CURSO WHERE codigo = codigo);
+        SET creditoscurso = (SELECT creditos_otorga FROM CURSO WHERE codigo = codigo_);
         SET creditosestud = (SELECT creditos FROM ESTUDIANTE WHERE carnet=carne);
         SET creditosestud = creditosestud + creditoscurso;
-        UPDATE ESTUDIANTE SET creditos=creditosestud WHERE carnet=carne; -- ! actualizo CREDITOS si aprobo
+        -- ! actualizo CREDITOS si aprobo
+        UPDATE ESTUDIANTE SET creditos=creditosestud WHERE carnet=carne; 
     END IF;
 
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
-    SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
+    SET idfound = SEARCH_COURSE(codigo_, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
 		RETURN 'EL CURSO NO EXISTE O NO ESTA HABILITADO';
 	END IF;
@@ -475,8 +479,9 @@ CREATE FUNCTION GenerarActa
     deterministic
     BEGIN
     DECLARE cdate DATETIME;
-    DECLARE temp BOOLEAN;
+    DECLARE temp INT;
     DECLARE idfound BOOLEAN;
+    DECLARE isasignado INT;
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
@@ -484,14 +489,22 @@ CREATE FUNCTION GenerarActa
 	END IF;
     -- ? Al momento de que el docente termina de ingresar notas se genera un acta, por lo que es necesario hacer la validación
     -- ? de que ya ingresó las notas de todos los estudiantes asignados, de lo contrario mostrar un error.
-
+    SET isasignado = (SELECT ASIGNADOS.id FROM ASIGNADOS
+        LEFT JOIN NOTAS ON NOTAS.carnet=ASIGNADOS.carnet
+        WHERE ASIGNADOS.id_curso_habilitado=1 AND NOTAS.nota IS NULL LIMIT 1);
+    IF (isasignado IS NOT NULL) THEN
+        RETURN CONCAT('ERROR DEBE AGREGAR LAS NOTAS DE TODOS LOS ESTUDIANTES ',isasignado);
+    END IF;
     -- ?  Se debe de almacenar la fecha y hora exacta en que se generó el acta.
     SET cdate = now(); -- * obtengo la fecha actual
-
+    SET temp = (SELECT id_curso_habilitado FROM ACTA WHERE id_curso_habilitado=idfound);
+    IF (temp is NOT NULL) THEN
+		RETURN 'ERROR YA SE GENERO EL ACTA DE ESE CURSO';
+	END IF;
     -- ? INSERTO
     INSERT INTO ACTA (id, id_curso_habilitado, fechayhora )
     VALUES (NULL, idfound, cdate);
-    RETURN "CURSO CREADO";
+    RETURN "ACTA GENERADA EXITOSAMENTE";
     END//
 DELIMITER ;
 
@@ -574,6 +587,10 @@ create procedure ConsultarEstudiante (IN carne BIGINT)
     -- → Número de DPI
     -- → Carrera
     -- → Créditos que posee
+    DECLARE carreratemp INT;
+    SET carreratemp = (SELECT carrera FROM ESTUDIANTE WHERE carnet=carne);
+
+
     SELECT carnet as CARNE,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
     fecha_nacimiento AS FECHA_DE_NACIMIENTO,
@@ -581,7 +598,7 @@ create procedure ConsultarEstudiante (IN carne BIGINT)
     telefono AS TELEFONO,
     direccion AS DIRECCION,
     dpi AS NUMERO_DPI,
-    carrera AS CARRERA,
+    (SELECT nombre FROM CARRERA WHERE id=carreratemp) AS CARRERA,
     creditos AS CREDITOS_POSEE
     FROM ESTUDIANTE WHERE carnet=carne;
     end; //
@@ -630,7 +647,7 @@ create procedure ConsultarAsignados (IN codigo INT, IN ciclo VARCHAR(45),IN anio
     END IF;
     -- ? Si no existe mostrar error
 
-    SELECT carnet as CARNET,
+    SELECT ESTUDIANTE.carnet as CARNET,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
     creditos AS CREDITOS_POSEE
     FROM ESTUDIANTE
@@ -662,9 +679,9 @@ create procedure ConsultarAprobacion (IN codigo INT, IN ciclo VARCHAR(45),IN ani
     END IF;
 
     SELECT codigo as CODIGO_CURSO,
-    carnet as CARNET,
+    ESTUDIANTE.carnet as CARNET,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
-    (SELECT IF(NOTAS.nota>=61, "APROBADO", "DESAPROBADO") AS APROBACION)
+    (SELECT IF(NOTAS.nota>=61, "APROBADO", "DESAPROBADO") ) AS APROBACION
     FROM ESTUDIANTE
     JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
     WHERE NOTAS.id_curso_habilitado=idfound;
@@ -672,7 +689,7 @@ create procedure ConsultarAprobacion (IN codigo INT, IN ciclo VARCHAR(45),IN ani
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄█▄██ 6. Consultar actas █▄██▄██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DELIMITER //
-create procedure ConsultarActas (IN codigo_curso INT)
+create procedure ConsultarActas (IN codigo_curso_ INT)
     begin
     -- → Código de curso (se repite en cada fila)
     -- → Sección
@@ -682,31 +699,50 @@ create procedure ConsultarActas (IN codigo_curso INT)
     -- → Fecha y hora de generado
     -- ? *Si no existe mostrar error
     DECLARE idfound INT;
-    SET idfound = (SELECT codigo_curso FROM HABILITADOS WHERE codigo_curso=codigo_curso LIMIT 1);
+    SET idfound = (SELECT codigo_curso FROM HABILITADOS WHERE codigo_curso=codigo_curso_ LIMIT 1);
     IF (idfound IS NULL) THEN
 		SELECT 'EL CURSO NO EXISTE O NO ESTA HABILITADO' AS ALERTA;
 	END IF;
+
     -- ? CONSULTA
-    SELECT codigo_curso as CODIGO_CURSO,
+    -- SELECT codigo_curso_ as CODIGO_CURSO,
+    -- (HABILITADOS.seccion) as SECCION,
+    -- (
+    --     SELECT IF(STRCMP(HABILITADOS.ciclo,"1S") = 0, "PRIMER SEMESTRE",
+    --     IF(STRCMP(HABILITADOS.ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
+    --     IF(STRCMP(HABILITADOS.ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
+    --     IF(STRCMP(HABILITADOS.ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) ))
+    -- ) AS CICLO,
+    -- 2022 AS ANIO,
+    -- (
+    --     SELECT COUNT(NOTAS.id) FROM NOTAS
+    --     JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
+    --     WHERE HABILITADOS.codigo_curso = codigo_curso_
+    -- ) AS CANT_ESTUDIANT_CURSO,
+    -- (
+    --     SELECT ACTA.fechayhora
+    --     FROM HABILITADOS
+    --     JOIN ACTA ON ACTA.id_curso_habilitado=HABILITADOS.id
+    --     WHERE HABILITADOS.codigo_curso=codigo_curso_
+    -- ) AS FECHA_HORA
+    -- FROM ACTA
+    -- JOIN HABILITADOS ON ACTA.id_curso_habilitado = HABILITADOS.id;
+
+
+    SELECT codigo_curso_ as CODIGO_CURSO,
     HABILITADOS.seccion as SECCION,
-    (SELECT IF(STRCMP(HABILITADOS.ciclo,"1S") = 0, "PRIMER SEMESTRE",
-
-            IF(STRCMP(HABILITADOS.ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
-
-                IF(STRCMP(HABILITADOS.ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
-
-                    IF(STRCMP(HABILITADOS.ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
-            )) AS CICLO,
-    2022 AS ANIO,
     (
-        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
-        JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
-        WHERE HABILITADOS.codigo_curso = codigo_curso
-    ) AS CANT_ESTUDIANT_CURSO,
+        SELECT IF(STRCMP(HABILITADOS.ciclo,"1S") = 0, "PRIMER SEMESTRE",
+        IF(STRCMP(HABILITADOS.ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
+        IF(STRCMP(HABILITADOS.ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
+        IF(STRCMP(HABILITADOS.ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) ))
+    ) AS CICLO,
+    2022 AS ANIO,
+    HABILITADOS.cant_estudiantes AS CANT_ESTUDIANT_CURSO,
     ACTA.fechayhora AS FECHA_HORA
-    FROM HABILITADOS
-    JOIN ACTA ON ACTA.id_curso_habilitado=HABILITADOS.id
-    WHERE HABILITADOS.codigo_curso=codigo_curso;
+    FROM ACTA
+    JOIN HABILITADOS ON ACTA.id_curso_habilitado = HABILITADOS.id WHERE codigo_curso_ = HABILITADOS.codigo_curso;
+    -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄ 7. Consultar tasa de desasignación ██▄██▄██▄██▄██▄██▄██▄██▄█
@@ -715,11 +751,9 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     begin
     -- → Código de curso
     -- → Sección
-    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” / 
-    -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE 
-    -- DICIEMBRE”
+    -- → Ciclo, se debe de traducir según sea el caso: “PRIMER SEMESTRE” /
+    -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE DICIEMBRE”
     -- → Año
-    
     DECLARE idfound INT;
     DECLARE cantestudiantes INT;
     DECLARE cantllevaroncurso INT;
@@ -737,8 +771,9 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
         SELECT 'ANIO NO REGISTRADO' AS ALERTA;
     END IF;
 
+    -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
     SET cantllevaroncurso =(
-        SELECT COUNT(NOTAS.id) FROM NOTAS           -- ? cuenta cantidad de notas ingresadas para el codigo de curso mandado
+        SELECT COUNT(NOTAS.id) FROM NOTAS
         JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
         WHERE HABILITADOS.codigo_curso = codigo AND HABILITADOS.seccion = seccion AND HABILITADOS.ciclo = ciclo
     ) ;
@@ -750,8 +785,8 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     seccion as SECCION,
     (SELECT IF(STRCMP(ciclo,"1S") = 0, "PRIMER SEMESTRE",
             IF(STRCMP(ciclo,"2S") = 0, "SEGUNDO SEMESTRE",
-                IF(STRCMP(ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
-                    IF(STRCMP(ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
+            IF(STRCMP(ciclo,"VJ") = 0, "VACACIONES DE JUNIO",
+            IF(STRCMP(ciclo,"VD") = 0, "VACACIONES DE DICIEMBRE", "N/E") ) )
             )) AS CICLO,
     2022 AS ANIO,
     -- → Cantidad de estudiantes que llevaron el curso
@@ -759,7 +794,7 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     -- → Cantidad de estudiantes que se desasignaron
     cantestudiantes AS ESTUDIANTES_DESASIGNADOS,
     -- → Porcentaje de desasignación
-    CONCAT((cantllevaroncurso * (cantestudiantes/100)), "%") AS PORCENTAJE_DESASIGNA
+    CONCAT(((cantestudiantes/cantllevaroncurso) *100), "%") AS PORCENTAJE_DESASIGNA
     FROM ESTUDIANTE
     JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
     WHERE NOTAS.id_curso_habilitado=idfound;

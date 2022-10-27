@@ -58,11 +58,11 @@ SELECT RegistrarEstudiante(10,'Estudiante10', 'Aguilar', '2001-12-24','socop@gma
 -- REGISTRAR 5 cursos por cada carrera y 5 de área común
 -- !  codigo,nombre,creditos_necesarios,creditos_otorga,carrera,obligatorio
 -- ? AREA COMUN     1 es comun
-SELECT CrearCurso(11, 'MATE BASICA 1',  0, 5, 1, 1) AS curso10;
-SELECT CrearCurso(22, 'MATE BASICA 2',  0, 5, 1, 1) AS curso20;
-SELECT CrearCurso(33, 'FISICA 1',       0, 5, 1, 1) AS curso30;
-SELECT CrearCurso(44, 'IDIOMA TECNICO', 0, 5, 1, 1) AS curso40;
-SELECT CrearCurso(55, 'ECONOMIA',       0, 5, 1, 1) AS curso50;
+SELECT CrearCurso(11, 'MATE BASICA 1',  0, 5, 1, 0) AS curso10;
+SELECT CrearCurso(22, 'MATE BASICA 2',  0, 5, 1, 0) AS curso20;
+SELECT CrearCurso(33, 'FISICA 1',       0, 5, 1, 0) AS curso30;
+SELECT CrearCurso(44, 'IDIOMA TECNICO', 0, 5, 1, 0) AS curso40;
+SELECT CrearCurso(55, 'ECONOMIA',       0, 5, 1, 0) AS curso50;
 -- ? SISTEMAS
 SELECT CrearCurso(66, 'ORGA', 15, 5, 2, 1) AS curso11;
 SELECT CrearCurso(77, 'IPC1', 15, 5, 2, 1) AS curso21;
@@ -87,4 +87,39 @@ SELECT CrearCurso(2222,  'CARROS2', 5, 5, 5, 1) AS curso24;
 SELECT CrearCurso(2323,  'CARROS3', 5, 5, 5, 1) AS curso34;
 SELECT CrearCurso(2424,  'CARROS4', 5, 5, 5, 1) AS curso44;
 SELECT CrearCurso(2525,  'CARROS5', 5, 5, 5, 1) AS curso54;
+
+
+-- ! 5. Habilitar curso para asignación 
+-- !codigo_curso ,ciclo , docente , cupo , seccion_
+SELECT HabilitarCurso(11, '1S', 1, 2, 'A');
+SELECT HabilitarCurso(22, '1S', 2, 2, 'B');
+SELECT HabilitarCurso(33, '1S', 3, 2, 'C');
+-- ! Agregar un horario de curso habilitado
+-- !id, id_curso_habilitado, dia, horario
+SELECT AgregarHorario(1, 1, '7:00-11:30');
+SELECT AgregarHorario(1, 2, '7:00-11:30');
+SELECT AgregarHorario(1, 3, '7:00-11:30');
+SELECT AgregarHorario(1, 4, '7:00-11:30');
+SELECT AgregarHorario(1, 5, '7:00-11:30');
+
+-- !codigo ,ciclo ,seccion , carne
+SELECT AsignarCurso(11,'1S', 'A', 1);
+SELECT AsignarCurso(11,'1S', 'A', 2);
+SELECT AsignarCurso(11,'1S', 'A', 3);
+SELECT AsignarCurso(22,'1S', 'B', 1);
+SELECT AsignarCurso(66,'1S', 'A', 1);
+
+SELECT DesasignarCurso(11,'1S', 'A', 1);
+
+-- ! codigo_  ,ciclo ,seccion , carne , nota
+SELECT IngresarNota(11, '1S', 'A', 1, 60);
+
+SELECT GenerarActa(11, '1S', 'A');
+
+SELECT ConsultarActas (11);
+
+call ConsultarDocente(1);
+
+
+
 
