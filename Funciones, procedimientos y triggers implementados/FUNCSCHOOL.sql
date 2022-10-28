@@ -27,7 +27,7 @@ CREATE FUNCTION ValidarLetras(correo VARCHAR(45)) RETURNS BOOLEAN
     BEGIN
     DECLARE valido BOOLEAN;
     -- * valido con el regex de CORREO
-    IF (SELECT REGEXP_INSTR(correo, '^[a-zA-Z]+$')=1)  THEN
+    IF (SELECT REGEXP_INSTR(correo, '^[a-zA-Z ]+$')=1)  THEN
         SELECT TRUE INTO valido;
     ELSE
         SELECT FALSE INTO valido;

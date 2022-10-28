@@ -2,7 +2,7 @@
 @echo off
 echo %~dp0
 git add .
-git commit -m "creating DATA processing (procedures)"
+git commit -m "adding models and finishing validations"
 git push
 
 
