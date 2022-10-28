@@ -1,4 +1,4 @@
---  SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
 --! █░█░█ █▀▀ █░░ █▀▀ █▀█ █▀▄▀█ █▀▀   ▀█▀ █▀█   █▀▄▀█ █▄█   █▀▄ █▄▄
 --! ▀▄▀▄▀ ██▄ █▄▄ █▄▄ █▄█ █░▀░█ ██▄   ░█░ █▄█   █░▀░█ ░█░   █▄▀ █▄█            ----------202000194-------
@@ -411,6 +411,7 @@ CREATE FUNCTION DesasignarCurso
     SET cantestudiantestemp = (SELECT cant_estudiantes FROM HABILITADOS WHERE idfound = id);
     SET cantestudiantestemp = cantestudiantestemp - 1;
     UPDATE HABILITADOS SET cant_estudiantes=cantestudiantestemp WHERE id=idfound;
+    DELETE FROM ASIGNADOS WHERE id_curso_habilitado=idfound AND carnet=carne;
 
     RETURN "ESTUDIANTE DESASIGNADO DEL CURSO";
     END//

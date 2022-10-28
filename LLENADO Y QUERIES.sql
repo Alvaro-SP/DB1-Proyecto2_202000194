@@ -91,12 +91,12 @@ SELECT CrearCurso(2525,  'CARROS5', 15, 5, 5, 1) AS curso54;
 -- !-------------- 5. Habilitar curso para asignación--------------
 -- ! codigo_curso ,ciclo , docente , cupo , seccion_
 -- habilito 3 cursos los que son obligatorios
-SELECT HabilitarCurso(11, '2S', 1, 5, 'A');
-SELECT HabilitarCurso(22, '2S', 2, 5, 'B');
-SELECT HabilitarCurso(33, '2S', 3, 8, 'C');
+SELECT HabilitarCurso(11, '2S', 2000501, 5, 'A');
+SELECT HabilitarCurso(22, '2S', 2000502, 5, 'B');
+SELECT HabilitarCurso(33, '2S', 2000503, 8, 'C');
 -- habilito solo 2 cursos de sistemas
-SELECT HabilitarCurso(66, '2S', 3, 4, 'C');
-SELECT HabilitarCurso(77, '2S', 3, 4, 'C');
+SELECT HabilitarCurso(66, '2S', 2000504, 4, 'C');
+SELECT HabilitarCurso(77, '2S', 2000505, 4, 'C');
 -- !-------------- Agregar un horario de curso habilitado--------------
 -- ! id_curso_habilitado, dia, horario
 SELECT AgregarHorario(1, 1, '7:00-11:30');
@@ -130,6 +130,7 @@ SELECT AsignarCurso(33,'2S', 'C', 2022005);
 SELECT AsignarCurso(33,'2S', 'C', 2022006);
 SELECT AsignarCurso(33,'2S', 'C', 2022007);
 -- !-------------- DESASIGNACION DE CURSO --------------
+SET SQL_SAFE_UPDATES=0;
 SELECT DesasignarCurso(33,'2S', 'C', 2022005);
 SELECT DesasignarCurso(33,'2S', 'C', 2022006);
 SELECT DesasignarCurso(33,'2S', 'C', 2022007);
@@ -154,16 +155,16 @@ SELECT IngresarNota(33, '2S', 'C', 2022004, 100);
 
 -- ! -------------- 10. GENERAR ACTA --------------
 SELECT GenerarActa(11, '2S', 'A');
-SELECT GenerarActa(22, '2S', 'A');
-SELECT GenerarActa(33, '2S', 'A');
+SELECT GenerarActa(22, '2S', 'B');
+SELECT GenerarActa(33, '2S', 'C');
 
 
 
 -- ! -------------- PROCESAMIENTO DE DATOS --------------
 -- ! -------------- 1. Consultar pensum --------------
-CALL ConsultarPensum(11);
-CALL ConsultarPensum(22);
-CALL ConsultarPensum(33);
+CALL ConsultarPensum(1);
+CALL ConsultarPensum(2);
+CALL ConsultarPensum(3);
 -- ! -------------- 2. Consultar estudiante --------------
 CALL ConsultarEstudiante(2022001);
 CALL ConsultarEstudiante(2022003);
