@@ -178,9 +178,9 @@ CALL ConsultarAprobacion(11, '2S', 2022, 'A');
 -- ! -------------- 6. Consultar actas --------------
 CALL ConsultarActas(11);
 -- ! -------------- 7. Consultar tasa de desasignación --------------
-SELECT ConsultarDesasignacion(11, '2S', 2022, 'A');
-SELECT ConsultarDesasignacion(22, '2S', 2022, 'B');
-SELECT ConsultarDesasignacion(33, '2S', 2022, 'C');
+CALL ConsultarDesasignacion(11, '2S', 2022, 'A');
+CALL ConsultarDesasignacion(22, '2S', 2022, 'B');
+CALL ConsultarDesasignacion(33, '2S', 2022, 'C');
 
 
 

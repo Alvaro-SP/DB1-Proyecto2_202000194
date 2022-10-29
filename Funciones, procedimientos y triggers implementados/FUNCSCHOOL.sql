@@ -606,7 +606,7 @@ create procedure ConsultarEstudiante (IN carne BIGINT)
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄███▄██▄██▄█   3. Consultar docente     ██▄██▄██▄██▄██▄██▄██▄██▄██▄█
 DELIMITER //
-create procedure ConsultarDocente (IN registro_siif BIGINT)
+create procedure ConsultarDocente (IN registro_siif_ BIGINT)
     begin
     -- → Registro SIIF
     -- → Nombre completo
@@ -615,14 +615,14 @@ create procedure ConsultarDocente (IN registro_siif BIGINT)
     -- → Teléfono
     -- → Dirección
     -- → Número de DPI
-    SELECT registro_siif as REGISTRO_SIIF,
+    SELECT registro_siif_ as REGISTRO_SIIF,
     CONCAT(nombres," ", apellidos) AS NOMBRE_COMPLETO,
     fecha_nacimiento AS FECHA_DE_NACIMIENTO,
     correo AS CORREO,
     telefono AS TELEFONO,
     direccion AS DIRECCION,
     dpi AS NUMERO_DPI
-    FROM DOCENTE WHERE registro_siif=registro_siif;
+    FROM DOCENTE WHERE registro_siif=registro_siif_;
     end; //
 DELIMITER;
 -- ! █▄██▄██▄██▄██▄██▄██▄██▄██▄ 4. Consultar estudiantes asignados ██▄██▄██▄███▄██▄██▄██▄
@@ -756,8 +756,9 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     -- “SEGUNDO SEMESTRE” / “VACACIONES DE JUNIO” / “VACACIONES DE DICIEMBRE”
     -- → Año
     DECLARE idfound INT;
-    DECLARE cantestudiantes INT;
+    DECLARE cantdesasignados INT;
     DECLARE cantllevaroncurso INT;
+    
     -- ? Se debe hacer match con la relación de curso habilitado por medio del año actual, ciclo y sección.
     SET idfound = SEARCH_COURSE(codigo, ciclo, seccion); -- ? retorna el id del CURSO HABILITADO.
     IF (idfound = -1) THEN
@@ -776,10 +777,12 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     SET cantllevaroncurso =(
         SELECT COUNT(NOTAS.id) FROM NOTAS
         JOIN HABILITADOS ON NOTAS.id_curso_habilitado=HABILITADOS.id
-        WHERE HABILITADOS.codigo_curso = codigo AND HABILITADOS.seccion = seccion AND HABILITADOS.ciclo = ciclo
+        WHERE HABILITADOS.id = idfound
     ) ;
-    SET cantestudiantes = (SELECT COUNT(id) FROM DESASIGNADOS WHERE DESASIGNADOS.id_curso_habilitado = idfound);
-
+    SET cantdesasignados = (SELECT cantidad_desasignados FROM DESASIGNADOS WHERE DESASIGNADOS.id_curso_habilitado = idfound);
+    IF (cantdesasignados IS NULL ) THEN
+        SET cantdesasignados = 0;
+    END IF;
 
     -- ? CONSULTA
     SELECT codigo as CODIGO_CURSO,
@@ -793,12 +796,12 @@ create procedure ConsultarDesasignacion (IN codigo INT, IN ciclo VARCHAR(45),IN 
     -- → Cantidad de estudiantes que llevaron el curso
     cantllevaroncurso AS CANT_ESTUDIANT_CURSO,
     -- → Cantidad de estudiantes que se desasignaron
-    cantestudiantes AS ESTUDIANTES_DESASIGNADOS,
+    cantdesasignados AS ESTUDIANTES_DESASIGNADOS,
     -- → Porcentaje de desasignación
-    CONCAT(((cantestudiantes/cantllevaroncurso) *100), "%") AS PORCENTAJE_DESASIGNA
+    CONCAT(((cantdesasignados/(cantllevaroncurso+cantdesasignados)) *100), "%") AS PORCENTAJE_DESASIGNA
     FROM ESTUDIANTE
     JOIN NOTAS ON NOTAS.carnet=ESTUDIANTE.carnet
-    WHERE NOTAS.id_curso_habilitado=idfound;
+    WHERE NOTAS.id_curso_habilitado=idfound LIMIT 1;
     end; //
 DELIMITER;
 
